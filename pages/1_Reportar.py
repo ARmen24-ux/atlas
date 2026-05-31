@@ -8,7 +8,6 @@ import os
 # =====================================================
 
 st.set_page_config(page_title="Reportar incidencia", layout="wide")
-
 st.title("📋 Reportar incidencia")
 
 # =====================================================
@@ -24,7 +23,7 @@ os.makedirs("data", exist_ok=True)
 os.makedirs(CARPETA_IMG, exist_ok=True)
 
 # =====================================================
-# CARGA DE CATÁLOGOS
+# CARGA CATÁLOGOS
 # =====================================================
 
 ubi = pd.read_csv(RUTA_UBI)
@@ -34,7 +33,7 @@ ubi.columns = ubi.columns.str.strip()
 act.columns = act.columns.str.strip()
 
 # =====================================================
-# CREAR CSV SI NO EXISTE
+# CSV BASE
 # =====================================================
 
 if not os.path.exists(RUTA_CSV):
@@ -48,6 +47,13 @@ if not os.path.exists(RUTA_CSV):
 
 df = pd.read_csv(RUTA_CSV)
 df.columns = df.columns.str.strip()
+
+# =====================================================
+# 🔥 FIX CLAVE: LIMPIAR ESTADO STREAMLIT
+# =====================================================
+
+if "edificio_sel" not in st.session_state:
+    st.session_state.edificio_sel = ubi["Edificio"].iloc[0]
 
 # =====================================================
 # FORMULARIO
@@ -64,11 +70,32 @@ with st.form("form"):
     st.divider()
     st.subheader("Ubicación")
 
-    edificio = st.selectbox("Edificio", ubi["Edificio"].unique())
+    # =================================================
+    # EDIFICIO (FUENTE PRINCIPAL)
+    # =================================================
+
+    edificio = st.selectbox(
+        "Edificio",
+        ubi["Edificio"].unique(),
+        key="edificio_sel"
+    )
+
+    # =================================================
+    # 🔥 FIX CLAVE: FILTRADO REAL DEPENDIENTE
+    # =================================================
+
+    areas_filtradas = ubi.loc[
+        ubi["Edificio"] == edificio, "Area"
+    ].dropna().unique()
+
+    # fallback de seguridad
+    if len(areas_filtradas) == 0:
+        areas_filtradas = ["Sin áreas registradas"]
 
     area = st.selectbox(
         "Área",
-        ubi[ubi["Edificio"] == edificio]["Area"].unique()
+        areas_filtradas,
+        key="area_sel"
     )
 
     ubicacion_detalle = st.text_input("Detalle adicional (opcional)")
@@ -85,7 +112,7 @@ with st.form("form"):
 
     prioridad = st.selectbox("Prioridad", ["Baja","Media","Alta","Crítica"])
 
-    descripcion = st.text_area("Descripción del problema")
+    descripcion = st.text_area("Descripción")
 
     impacto = st.selectbox("Impacto", [
         "No afecta actividades",
@@ -98,17 +125,15 @@ with st.form("form"):
     enviar = st.form_submit_button("Enviar reporte")
 
 # =====================================================
-# GUARDAR REPORTE
+# GUARDAR
 # =====================================================
 
 if enviar:
 
-    # VALIDACIONES BÁSICAS
     if descripcion.strip() == "":
         st.error("Describe el problema")
         st.stop()
 
-    # FOTO
     ruta_img = ""
 
     if imagen:
@@ -118,11 +143,7 @@ if enviar:
         with open(ruta_img, "wb") as f:
             f.write(imagen.getbuffer())
 
-    # FOLIO AUTOMÁTICO
     folio = f"UTG-2026-{len(df)+1:05d}"
-
-    # REGLA DE ESTADO INICIAL
-    estado = "Pendiente"
 
     nuevo = {
         "ID": len(df)+1,
@@ -139,7 +160,7 @@ if enviar:
         "Prioridad": prioridad,
         "Descripcion": descripcion,
         "Impacto": impacto,
-        "Estado": estado,
+        "Estado": "Pendiente",
         "Responsable": "",
         "FechaActualizacion": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "Imagen": ruta_img

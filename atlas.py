@@ -273,6 +273,9 @@ pendientes = len(df[df["Estado"] == "Pendiente"])
 
 en_proceso = len(df[df["Estado"] == "En proceso"])
 
+if "Prioridad" not in df.columns:
+    df["Prioridad"] = "Normal"
+    
 urgentes = len(df[df["Prioridad"] == "Urgente"])
 
 col1, col2, col3, col4 = st.columns(4)
@@ -324,7 +327,7 @@ with st.sidebar.form("formulario_reporte"):
     )
 
     enviar = st.form_submit_button("Guardar reporte")
-    
+
 # =====================================================
 # GUARDAR REPORTE
 # =====================================================

@@ -23,7 +23,7 @@ os.makedirs("data", exist_ok=True)
 os.makedirs(CARPETA_IMG, exist_ok=True)
 
 # =====================================================
-# CATÁLOGOS
+# CARGA DE CATÁLOGOS
 # =====================================================
 
 ubi = pd.read_csv(RUTA_UBI)
@@ -49,7 +49,26 @@ df = pd.read_csv(RUTA_CSV)
 df.columns = df.columns.str.strip()
 
 # =====================================================
-# FORMULARIO
+# 🔥 UBICACIÓN (FUERA DEL FORM - FIX REAL STREAMLIT)
+# =====================================================
+
+st.subheader("Ubicación")
+
+edificio = st.selectbox("Edificio", ubi["Edificio"].unique())
+
+areas_filtradas = ubi.loc[
+    ubi["Edificio"] == edificio, "Area"
+].dropna().unique().tolist()
+
+if not areas_filtradas:
+    areas_filtradas = ["Sin áreas registradas"]
+
+area = st.selectbox("Área", areas_filtradas)
+
+ubicacion_detalle = st.text_input("Detalle adicional (opcional)")
+
+# =====================================================
+# FORMULARIO SOLO PARA ENVÍO
 # =====================================================
 
 with st.form("form"):
@@ -59,36 +78,6 @@ with st.form("form"):
     tipo = st.selectbox("Tipo de usuario", ["Alumno","Docente","Administrativo"])
     nombre = st.text_input("Nombre")
     correo = st.text_input("Correo")
-
-    st.divider()
-    st.subheader("Ubicación")
-
-    # =====================================================
-    # EDIFICIO
-    # =====================================================
-
-    edificio = st.selectbox(
-        "Edificio",
-        ubi["Edificio"].unique()
-    )
-
-    # =====================================================
-    # 🔥 FIX REAL DE STREAMLIT (DEPENDENCIA ESTABLE)
-    # =====================================================
-
-    areas_filtradas = ubi[ubi["Edificio"] == edificio]["Area"].dropna().unique().tolist()
-
-    if len(areas_filtradas) == 0:
-        areas_filtradas = ["Sin áreas registradas"]
-
-    # key dinámica = RECONSTRUYE widget correctamente
-    area = st.selectbox(
-        "Área",
-        options=areas_filtradas,
-        key=f"area_{edificio}"
-    )
-
-    ubicacion_detalle = st.text_input("Detalle adicional (opcional)")
 
     st.divider()
     st.subheader("Problema")
@@ -106,7 +95,7 @@ with st.form("form"):
 
     impacto = st.selectbox("Impacto", [
         "No afecta actividades",
-        "Afecta parcialmente actividades",
+        "Afecta parcialmente",
         "Impide actividades"
     ])
 
@@ -161,5 +150,4 @@ if enviar:
 
     st.success(f"Reporte enviado: {folio}")
     st.rerun()
-
     

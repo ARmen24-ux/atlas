@@ -1,4 +1,18 @@
 import streamlit as st
+
+# =====================================================
+# PROTECCIÓN DE ACCESO
+# =====================================================
+
+if "rol" not in st.session_state:
+    st.warning("Acceso restringido. Inicia sesión.")
+    st.stop()
+
+if st.session_state.rol not in ["admin", "mantenimiento"]:
+    st.error("No tienes permisos para este panel")
+    st.stop()
+
+import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import datetime

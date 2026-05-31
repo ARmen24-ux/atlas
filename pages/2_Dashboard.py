@@ -9,24 +9,22 @@ import os
 # =====================================================
 
 st.set_page_config(page_title="ATLAS Dashboard", layout="wide")
-st.title("📊 ATLAS - Panel de Gestión de Mantenimiento")
+st.title("📊 ATLAS - Panel de Mantenimiento")
 
 # =====================================================
 # PROTECCIÓN DE ACCESO
 # =====================================================
 
 if "rol" not in st.session_state:
-    st.warning("Acceso restringido. Inicia sesión.")
+    st.warning("Acceso restringido")
     st.stop()
 
-rol = st.session_state.rol
-
-if rol not in ["admin", "mantenimiento"]:
-    st.error("No tienes permisos para este panel.")
+if st.session_state.rol not in ["admin", "mantenimiento"]:
+    st.error("Sin permisos")
     st.stop()
 
 # =====================================================
-# RUTA CSV
+# CARGA DE DATOS
 # =====================================================
 
 RUTA_CSV = "data/reportes.csv"
@@ -53,7 +51,13 @@ for col in columnas_base:
         df[col] = "Sin dato"
 
 # =====================================================
-# FLUJO DE ESTADOS (ATLAS)
+# NORMALIZACIÓN CRÍTICA
+# =====================================================
+
+df["ID"] = df["ID"].astype(str)
+
+# =====================================================
+# FLUJO DE ESTADOS
 # =====================================================
 
 TRANSICIONES = {
@@ -68,7 +72,7 @@ TRANSICIONES = {
 # FILTROS
 # =====================================================
 
-st.sidebar.header("🔎 Filtros")
+st.sidebar.header("Filtros")
 
 estado_filtro = st.sidebar.multiselect(
     "Estado",
@@ -94,7 +98,7 @@ col4.metric("Resueltos", len(df[df["Estado"] == "Resuelto"]))
 st.divider()
 
 # =====================================================
-# GRÁFICOS
+# GRÁFICOS (BLINDADOS)
 # =====================================================
 
 colA, colB = st.columns(2)
@@ -103,62 +107,76 @@ with colA:
 
     st.subheader("📊 Tickets por estado")
 
-    estado_counts = (
-        df.groupby("Estado")
-        .size()
-        .reset_index(name="Cantidad")
-    )
+    estado_counts = df.groupby("Estado").size().reset_index(name="Cantidad")
 
-    fig1 = px.bar(
-        estado_counts,
-        x="Estado",
-        y="Cantidad",
-        text="Cantidad",
-        title="Distribución por estado"
-    )
+    if not estado_counts.empty:
 
-    st.plotly_chart(fig1, use_container_width=True)
+        fig1 = px.bar(
+            estado_counts,
+            x="Estado",
+            y="Cantidad",
+            text="Cantidad"
+        )
+
+        st.plotly_chart(fig1, use_container_width=True)
 
 with colB:
 
     st.subheader("📊 Tickets por prioridad")
 
-    fig2 = px.pie(
-        df,
-        names="Prioridad"
-    )
+    if "Prioridad" in df.columns:
 
-    st.plotly_chart(fig2, use_container_width=True)
+        fig2 = px.pie(
+            df,
+            names="Prioridad"
+        )
+
+        st.plotly_chart(fig2, use_container_width=True)
 
 st.divider()
 
 # =====================================================
-# GESTIÓN DE TICKETS
+# GESTIÓN DE TICKETS (SEGURA)
 # =====================================================
 
 st.subheader("🛠 Gestión de tickets")
 
-ticket_id = st.selectbox("Selecciona ticket (ID)", df["ID"])
+if len(df) == 0:
+    st.warning("No hay tickets disponibles")
+    st.stop()
 
-ticket = df[df["ID"] == ticket_id].iloc[0]
+ticket_id = st.selectbox("Selecciona ticket", df["ID"].unique())
+
+ticket_df = df[df["ID"] == ticket_id]
+
+if ticket_df.empty:
+    st.error("Ticket no encontrado")
+    st.stop()
+
+ticket = ticket_df.iloc[0]
 
 st.write("### Información del ticket")
 st.write(ticket)
+
+# =====================================================
+# CAMBIO DE ESTADO SEGURO
+# =====================================================
 
 estado_actual = ticket["Estado"]
 
 opciones_validas = TRANSICIONES.get(estado_actual, [])
 
 if len(opciones_validas) == 0:
-    st.info("Este ticket no puede cambiar de estado")
+    st.info("Este ticket no tiene más transiciones")
     nuevo_estado = estado_actual
 else:
-    nuevo_estado = st.selectbox(
-        "Nuevo estado",
-        opciones_validas
-    )
+    nuevo_estado = st.selectbox("Nuevo estado", opciones_validas)
 
-responsable = st.text_input("Responsable (opcional)", value=ticket.get("Responsable", ""))
+responsable = st.text_input("Responsable", value=str(ticket.get("Responsable", "")))
+
+# =====================================================
+# ACTUALIZACIÓN
+# =====================================================
 
 if st.button("Actualizar ticket"):
 

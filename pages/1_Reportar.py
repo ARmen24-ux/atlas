@@ -116,3 +116,5 @@ if enviar:
     st.success("Reporte guardado")
     st.rerun()
     
+    from utils.data_guard import asegurar_esquema
+    

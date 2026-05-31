@@ -116,3 +116,7 @@ st.dataframe(
     df.sort_values("Fecha", ascending=False).head(20),
     use_container_width=True
 )
+
+from utils.data_guard import asegurar_esquema
+
+df = asegurar_esquema(df)

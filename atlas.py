@@ -275,7 +275,7 @@ en_proceso = len(df[df["Estado"] == "En proceso"])
 
 if "Prioridad" not in df.columns:
     df["Prioridad"] = "Normal"
-    
+
 urgentes = len(df[df["Prioridad"] == "Urgente"])
 
 col1, col2, col3, col4 = st.columns(4)
@@ -553,3 +553,6 @@ with open(RUTA_CSV, "rb") as archivo:
         mime="text/csv"
     )
 
+from utils.data_guard import asegurar_esquema
+
+df = asegurar_esquema(df)

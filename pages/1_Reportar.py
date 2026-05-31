@@ -24,8 +24,9 @@ st.write(
 # =====================================================
 
 RUTA_CSV = os.path.join("data", "reportes.csv")
+RUTA_UBICACIONES = os.path.join("data", "catalogo_ubicaciones.csv")
+RUTA_ACTIVOS = os.path.join("data", "catalogo_activos.csv")
 CARPETA_EVIDENCIAS = "evidencias"
-RUTA_CATALOGO = os.path.join("data", "catalogo_ubicaciones.csv")
 
 # =====================================================
 # CREAR CARPETAS
@@ -48,6 +49,7 @@ if not os.path.exists(RUTA_CSV):
         "Correo",
         "Edificio",
         "Area",
+        "Activo",
         "Categoria",
         "Descripcion",
         "Impacto",
@@ -58,19 +60,34 @@ if not os.path.exists(RUTA_CSV):
     df_inicial.to_csv(RUTA_CSV, index=False)
 
 # =====================================================
-# LEER CSV
+# LEER DATOS
 # =====================================================
 
 df = pd.read_csv(RUTA_CSV)
 
-# =====================================================
-# CARGAR CATÁLOGO DE UBICACIONES
-# =====================================================
-
-catalogo = pd.read_csv(RUTA_CATALOGO)
-
+catalogo = pd.read_csv(RUTA_UBICACIONES)
 catalogo["Edificio"] = catalogo["Edificio"].str.strip()
 catalogo["Area"] = catalogo["Area"].str.strip()
+
+activos_df = pd.read_csv(RUTA_ACTIVOS)
+activos_df["Activo"] = activos_df["Activo"].str.strip()
+
+# =====================================================
+# UBICACIÓN (FUERA DEL FORM)
+# =====================================================
+
+st.subheader("Ubicación")
+
+edificios = catalogo["Edificio"].unique()
+edificio = st.selectbox("Edificio", edificios)
+
+areas_filtradas = catalogo[
+    catalogo["Edificio"] == edificio
+]["Area"].unique()
+
+area = st.selectbox("Área", areas_filtradas)
+
+st.divider()
 
 # =====================================================
 # FORMULARIO
@@ -90,28 +107,12 @@ with st.form("formulario_reporte"):
 
     st.divider()
 
-    # =====================================================
-    # UBICACIÓN (CONTROLADA)
-    # =====================================================
-
-    st.subheader("Ubicación")
-
-    edificios = catalogo["Edificio"].unique()
-    edificio = st.selectbox("Edificio", edificios)
-
-    areas_filtradas = catalogo[
-        catalogo["Edificio"] == edificio
-    ]["Area"].unique()
-
-    area = st.selectbox("Área", areas_filtradas)
-
-    st.divider()
-
-    # =====================================================
-    # INFORMACIÓN DEL PROBLEMA
-    # =====================================================
-
     st.subheader("Información del problema")
+
+    activo = st.selectbox(
+        "¿Qué está afectado?",
+        activos_df["Activo"].unique()
+    )
 
     categoria = st.selectbox(
         "Categoría",
@@ -142,10 +143,6 @@ with st.form("formulario_reporte"):
     )
 
     st.divider()
-
-    # =====================================================
-    # EVIDENCIA
-    # =====================================================
 
     imagen = st.file_uploader(
         "Subir evidencia",
@@ -192,6 +189,7 @@ if enviar:
         "Correo": correo,
         "Edificio": edificio,
         "Area": area,
+        "Activo": activo,
         "Categoria": categoria,
         "Descripcion": descripcion,
         "Impacto": impacto,

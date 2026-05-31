@@ -25,6 +25,7 @@ st.write(
 
 RUTA_CSV = os.path.join("data", "reportes.csv")
 CARPETA_EVIDENCIAS = "evidencias"
+RUTA_CATALOGO = os.path.join("data", "catalogo_ubicaciones.csv")
 
 # =====================================================
 # CREAR CARPETAS
@@ -63,6 +64,15 @@ if not os.path.exists(RUTA_CSV):
 df = pd.read_csv(RUTA_CSV)
 
 # =====================================================
+# CARGAR CATÁLOGO DE UBICACIONES
+# =====================================================
+
+catalogo = pd.read_csv(RUTA_CATALOGO)
+
+catalogo["Edificio"] = catalogo["Edificio"].str.strip()
+catalogo["Area"] = catalogo["Area"].str.strip()
+
+# =====================================================
 # FORMULARIO
 # =====================================================
 
@@ -72,42 +82,34 @@ with st.form("formulario_reporte"):
 
     tipo_usuario = st.selectbox(
         "Tipo de usuario",
-        [
-            "Alumno",
-            "Docente",
-            "Administrativo"
-        ]
+        ["Alumno", "Docente", "Administrativo"]
     )
 
-    nombre = st.text_input(
-        "Nombre (opcional)"
-    )
-
-    correo = st.text_input(
-        "Correo institucional (opcional)"
-    )
+    nombre = st.text_input("Nombre (opcional)")
+    correo = st.text_input("Correo institucional (opcional)")
 
     st.divider()
+
+    # =====================================================
+    # UBICACIÓN (CONTROLADA)
+    # =====================================================
 
     st.subheader("Ubicación")
 
-    edificio = st.selectbox(
-        "Edificio",
-        [
-            "Edificio 1 - Laboratorios y Talleres",
-            "Edificio 2 - Cafetería",
-            "Edificio 3 - Information Center",
-            "Edificio 4 - Aulas y Oficinas",
-            "Laboratorio de Aeronáutica",
-            "Instalaciones Deportivas"
-        ]
-    )
+    edificios = catalogo["Edificio"].unique()
+    edificio = st.selectbox("Edificio", edificios)
 
-    area = st.text_input(
-        "Área específica"
-    )
+    areas_filtradas = catalogo[
+        catalogo["Edificio"] == edificio
+    ]["Area"].unique()
+
+    area = st.selectbox("Área", areas_filtradas)
 
     st.divider()
+
+    # =====================================================
+    # INFORMACIÓN DEL PROBLEMA
+    # =====================================================
 
     st.subheader("Información del problema")
 
@@ -128,9 +130,7 @@ with st.form("formulario_reporte"):
         ]
     )
 
-    descripcion = st.text_area(
-        "Descripción del problema"
-    )
+    descripcion = st.text_area("Descripción del problema")
 
     impacto = st.selectbox(
         "Impacto del problema",
@@ -143,24 +143,22 @@ with st.form("formulario_reporte"):
 
     st.divider()
 
+    # =====================================================
+    # EVIDENCIA
+    # =====================================================
+
     imagen = st.file_uploader(
         "Subir evidencia",
         type=["png", "jpg", "jpeg"]
     )
 
-    enviar = st.form_submit_button(
-        "Enviar reporte"
-    )
+    enviar = st.form_submit_button("Enviar reporte")
 
 # =====================================================
 # GUARDAR REPORTE
 # =====================================================
 
 if enviar:
-
-    if area.strip() == "":
-        st.error("Debe indicar el área específica.")
-        st.stop()
 
     if descripcion.strip() == "":
         st.error("Debe describir el problema.")
@@ -182,9 +180,7 @@ if enviar:
         )
 
         with open(ruta_imagen, "wb") as archivo:
-            archivo.write(
-                imagen.getbuffer()
-            )
+            archivo.write(imagen.getbuffer())
 
     nuevo_id = len(df) + 1
 
@@ -203,20 +199,11 @@ if enviar:
         "Imagen": ruta_imagen
     }
 
-    df = pd.concat(
-        [df, pd.DataFrame([nuevo_reporte])],
-        ignore_index=True
-    )
+    df = pd.concat([df, pd.DataFrame([nuevo_reporte])], ignore_index=True)
 
-    df.to_csv(
-        RUTA_CSV,
-        index=False
-    )
+    df.to_csv(RUTA_CSV, index=False)
 
-    st.success(
-        "Reporte enviado correctamente."
-    )
-
+    st.success("Reporte enviado correctamente.")
     st.balloons()
 
     st.rerun()

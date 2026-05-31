@@ -555,3 +555,4 @@ with open(RUTA_CSV, "rb") as archivo:
         file_name="reportes.csv",
         mime="text/csv"
     )
+

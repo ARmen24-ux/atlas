@@ -41,7 +41,7 @@ CONTENEDOR PRINCIPAL
 TITULO PRINCIPAL
 ===================================================== */
 
-.titulo-atlas {
+.titulo-Atlas {
     text-align: center;
     font-size: 5rem;
     font-weight: 800;

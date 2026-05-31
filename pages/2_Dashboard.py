@@ -99,12 +99,20 @@ with colA:
 
     st.subheader("📊 Tickets por estado")
 
-    fig1 = px.bar(
-        df["Estado"].value_counts().reset_index(),
-        x="index",
-        y="Estado",
-        labels={"index":"Estado","Estado":"Cantidad"}
+    estado_counts = (
+        df.groupby("Estado")
+        .size()
+        .reset_index(name="Cantidad")
     )
+
+    fig1 = px.bar(
+        estado_counts,
+        x="Estado",
+        y="Cantidad",
+        text="Cantidad",
+        title="Tickets por estado"
+    )
+
     st.plotly_chart(fig1, use_container_width=True)
 
 with colB:
@@ -116,40 +124,6 @@ with colB:
         names="Prioridad"
     )
     st.plotly_chart(fig2, use_container_width=True)
-
-st.divider()
-
-# =====================================================
-# GESTIÓN DE TICKETS
-# =====================================================
-
-st.subheader("🛠 Gestión de tickets")
-
-ticket_id = st.selectbox("Selecciona ticket (ID)", df["ID"])
-
-ticket = df[df["ID"] == ticket_id].iloc[0]
-
-st.write("### Información del ticket")
-st.write(ticket)
-
-nuevo_estado = st.selectbox(
-    "Cambiar estado",
-    ["Pendiente","En revisión","Asignado","En proceso","Completado","Cancelado"],
-    index=0
-)
-
-responsable = st.text_input("Responsable (opcional)")
-
-if st.button("Actualizar ticket"):
-
-    df.loc[df["ID"] == ticket_id, "Estado"] = nuevo_estado
-    df.loc[df["ID"] == ticket_id, "Responsable"] = responsable
-    df.loc[df["ID"] == ticket_id, "FechaActualizacion"] = datetime.now().strftime("%Y-%m-%d %H:%M")
-
-    df.to_csv(RUTA_CSV, index=False)
-
-    st.success("Ticket actualizado correctamente")
-    st.rerun()
 
 st.divider()
 

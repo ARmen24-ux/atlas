@@ -3,72 +3,89 @@ import pandas as pd
 from datetime import datetime
 import os
 
-st.set_page_config(page_title="Reportar", layout="wide")
+# =====================================================
+# CONFIGURACIÓN
+# =====================================================
+
+st.set_page_config(page_title="Reportar incidencia", layout="wide")
+
+st.title("📋 Reportar incidencia")
+
+# =====================================================
+# RUTAS
+# =====================================================
 
 RUTA_CSV = "data/reportes.csv"
-RUTA_UBICACIONES = "data/catalogo_ubicaciones.csv"
+RUTA_UBI = "data/catalogo_ubicaciones.csv"
 RUTA_ACTIVOS = "data/catalogo_activos.csv"
-CARPETA_EVIDENCIAS = "evidencias"
+CARPETA_IMG = "evidencias"
 
 os.makedirs("data", exist_ok=True)
-os.makedirs(CARPETA_EVIDENCIAS, exist_ok=True)
+os.makedirs(CARPETA_IMG, exist_ok=True)
 
-# =========================
-# CARGA CATÁLOGOS
-# =========================
+# =====================================================
+# CARGA DE CATÁLOGOS
+# =====================================================
 
-cat_ubi = pd.read_csv(RUTA_UBICACIONES)
-cat_act = pd.read_csv(RUTA_ACTIVOS)
+ubi = pd.read_csv(RUTA_UBI)
+act = pd.read_csv(RUTA_ACTIVOS)
 
-cat_ubi.columns = cat_ubi.columns.str.strip()
-cat_act.columns = cat_act.columns.str.strip()
+ubi.columns = ubi.columns.str.strip()
+act.columns = act.columns.str.strip()
 
-# =========================
-# CSV REPORTES
-# =========================
+# =====================================================
+# CREAR CSV SI NO EXISTE
+# =====================================================
 
 if not os.path.exists(RUTA_CSV):
     df_init = pd.DataFrame(columns=[
-        "ID","Fecha","TipoUsuario","Nombre","Correo",
-        "Edificio","Area","Activo","Categoria",
-        "Descripcion","Impacto","Estado","Imagen"
+        "ID","Folio","FechaCreacion","TipoUsuario","Nombre","Correo",
+        "Edificio","Area","UbicacionDetalle","Activo","Categoria",
+        "Prioridad","Descripcion","Impacto","Estado",
+        "Responsable","FechaActualizacion","Imagen"
     ])
     df_init.to_csv(RUTA_CSV, index=False)
 
 df = pd.read_csv(RUTA_CSV)
 df.columns = df.columns.str.strip()
 
-# =========================
-# UBICACIÓN
-# =========================
-
-st.subheader("Ubicación")
-
-edificio = st.selectbox("Edificio", cat_ubi["Edificio"].unique())
-
-area = st.selectbox(
-    "Área",
-    cat_ubi[cat_ubi["Edificio"] == edificio]["Area"].unique()
-)
-
-# =========================
-# FORM
-# =========================
+# =====================================================
+# FORMULARIO
+# =====================================================
 
 with st.form("form"):
 
-    tipo = st.selectbox("Tipo usuario", ["Alumno","Docente","Admin"])
+    st.subheader("Datos del usuario")
+
+    tipo = st.selectbox("Tipo de usuario", ["Alumno","Docente","Administrativo"])
     nombre = st.text_input("Nombre")
     correo = st.text_input("Correo")
 
-    activo = st.selectbox("Activo afectado", cat_act["Activo"].unique())
+    st.divider()
+    st.subheader("Ubicación")
+
+    edificio = st.selectbox("Edificio", ubi["Edificio"].unique())
+
+    area = st.selectbox(
+        "Área",
+        ubi[ubi["Edificio"] == edificio]["Area"].unique()
+    )
+
+    ubicacion_detalle = st.text_input("Detalle adicional (opcional)")
+
+    st.divider()
+    st.subheader("Problema")
+
+    activo = st.selectbox("Activo afectado", act["Activo"].unique())
 
     categoria = st.selectbox("Categoría", [
         "Electricidad","Plomería","Infraestructura","Mobiliario",
-        "Cómputo","Taller","Clima","Red","Seguridad","Limpieza","Otro"
+        "Cómputo","Red","Seguridad","Limpieza","Otro"
     ])
 
-    descripcion = st.text_area("Descripción")
+    prioridad = st.selectbox("Prioridad", ["Baja","Media","Alta","Crítica"])
+
+    descripcion = st.text_area("Descripción del problema")
 
     impacto = st.selectbox("Impacto", [
         "No afecta actividades",
@@ -78,43 +95,59 @@ with st.form("form"):
 
     imagen = st.file_uploader("Evidencia", type=["png","jpg","jpeg"])
 
-    enviar = st.form_submit_button("Enviar")
+    enviar = st.form_submit_button("Enviar reporte")
 
-# =========================
-# GUARDAR
-# =========================
+# =====================================================
+# GUARDAR REPORTE
+# =====================================================
 
 if enviar:
 
+    # VALIDACIONES BÁSICAS
+    if descripcion.strip() == "":
+        st.error("Describe el problema")
+        st.stop()
+
+    # FOTO
     ruta_img = ""
 
     if imagen:
-        nombre_img = datetime.now().strftime("%Y%m%d%H%M%S")+"_"+imagen.name
-        ruta_img = os.path.join(CARPETA_EVIDENCIAS, nombre_img)
+        nombre_img = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + imagen.name
+        ruta_img = os.path.join(CARPETA_IMG, nombre_img)
+
         with open(ruta_img, "wb") as f:
             f.write(imagen.getbuffer())
 
+    # FOLIO AUTOMÁTICO
+    folio = f"UTG-2026-{len(df)+1:05d}"
+
+    # REGLA DE ESTADO INICIAL
+    estado = "Pendiente"
+
     nuevo = {
         "ID": len(df)+1,
-        "Fecha": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "Folio": folio,
+        "FechaCreacion": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "TipoUsuario": tipo,
         "Nombre": nombre,
         "Correo": correo,
         "Edificio": edificio,
         "Area": area,
+        "UbicacionDetalle": ubicacion_detalle,
         "Activo": activo,
         "Categoria": categoria,
+        "Prioridad": prioridad,
         "Descripcion": descripcion,
         "Impacto": impacto,
-        "Estado": "Pendiente",
+        "Estado": estado,
+        "Responsable": "",
+        "FechaActualizacion": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "Imagen": ruta_img
     }
 
     df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
     df.to_csv(RUTA_CSV, index=False)
 
-    st.success("Reporte guardado")
+    st.success(f"Reporte enviado: {folio}")
     st.rerun()
-    
-    from utils.data_guard import asegurar_esquema
     

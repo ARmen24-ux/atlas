@@ -23,7 +23,7 @@ os.makedirs("data", exist_ok=True)
 os.makedirs(CARPETA_IMG, exist_ok=True)
 
 # =====================================================
-# CARGA CATÁLOGOS
+# CATÁLOGOS
 # =====================================================
 
 ubi = pd.read_csv(RUTA_UBI)
@@ -49,13 +49,6 @@ df = pd.read_csv(RUTA_CSV)
 df.columns = df.columns.str.strip()
 
 # =====================================================
-# 🔥 FIX CLAVE: LIMPIAR ESTADO STREAMLIT
-# =====================================================
-
-if "edificio_sel" not in st.session_state:
-    st.session_state.edificio_sel = ubi["Edificio"].iloc[0]
-
-# =====================================================
 # FORMULARIO
 # =====================================================
 
@@ -70,32 +63,29 @@ with st.form("form"):
     st.divider()
     st.subheader("Ubicación")
 
-    # =================================================
-    # EDIFICIO (FUENTE PRINCIPAL)
-    # =================================================
+    # =====================================================
+    # EDIFICIO
+    # =====================================================
 
     edificio = st.selectbox(
         "Edificio",
-        ubi["Edificio"].unique(),
-        key="edificio_sel"
+        ubi["Edificio"].unique()
     )
 
-    # =================================================
-    # 🔥 FIX CLAVE: FILTRADO REAL DEPENDIENTE
-    # =================================================
+    # =====================================================
+    # 🔥 FIX REAL DE STREAMLIT (DEPENDENCIA ESTABLE)
+    # =====================================================
 
-    areas_filtradas = ubi.loc[
-        ubi["Edificio"] == edificio, "Area"
-    ].dropna().unique()
+    areas_filtradas = ubi[ubi["Edificio"] == edificio]["Area"].dropna().unique().tolist()
 
-    # fallback de seguridad
     if len(areas_filtradas) == 0:
         areas_filtradas = ["Sin áreas registradas"]
 
+    # key dinámica = RECONSTRUYE widget correctamente
     area = st.selectbox(
         "Área",
-        areas_filtradas,
-        key="area_sel"
+        options=areas_filtradas,
+        key=f"area_{edificio}"
     )
 
     ubicacion_detalle = st.text_input("Detalle adicional (opcional)")
@@ -171,4 +161,5 @@ if enviar:
 
     st.success(f"Reporte enviado: {folio}")
     st.rerun()
+
     

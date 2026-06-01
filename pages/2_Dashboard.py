@@ -121,43 +121,80 @@ df_filtrado = df[
 ]
 
 # =====================================================
+# CÁLCULO DE SLA
+# =====================================================
+
+sla_estado = []
+sla_horas = []
+
+for _, fila in df_filtrado.iterrows():
+
+    estado_sla, horas = calcular_sla(
+        fila["FechaCreacion"],
+        fila["Prioridad"]
+    )
+
+    sla_estado.append(estado_sla)
+    sla_horas.append(horas)
+
+df_filtrado = df_filtrado.copy()
+
+df_filtrado["SLA"] = sla_estado
+df_filtrado["HorasRestantes"] = sla_horas
+
+# =====================================================
 # KPIs
 # =====================================================
 
 st.subheader("📌 Indicadores")
 
+en_tiempo = len(
+    df_filtrado[
+        df_filtrado["SLA"] == "En tiempo"
+    ]
+)
+
+proximos = len(
+    df_filtrado[
+        df_filtrado["SLA"] == "Próximo a vencer"
+    ]
+)
+
+vencidos = len(
+    df_filtrado[
+        df_filtrado["SLA"] == "Vencido"
+    ]
+)
+
+cumplimiento = 0
+
+if len(df_filtrado) > 0:
+
+    cumplimiento = round(
+        (en_tiempo / len(df_filtrado)) * 100,
+        1
+    )
+
 col1, col2, col3, col4 = st.columns(4)
 
 col1.metric(
-    "Total",
-    len(df_filtrado)
+    "🟢 En tiempo",
+    en_tiempo
 )
 
 col2.metric(
-    "Pendientes",
-    len(
-        df_filtrado[
-            df_filtrado["Estado"] == "Pendiente"
-        ]
-    )
+    "🟡 Próximos",
+    proximos
 )
 
 col3.metric(
-    "En proceso",
-    len(
-        df_filtrado[
-            df_filtrado["Estado"] == "En proceso"
-        ]
-    )
+    "🔴 Vencidos",
+    vencidos
 )
 
 col4.metric(
-    "Resueltos",
-    len(
-        df_filtrado[
-            df_filtrado["Estado"] == "Resuelto"
-        ]
-    )
+    "📈 SLA %",
+    f"{cumplimiento}%"
 )
 
 st.divider()
@@ -243,6 +280,11 @@ if ticket_df.empty:
     st.stop()
 
 ticket = ticket_df.iloc[0]
+
+estado_sla, horas_restantes = calcular_sla(
+    ticket["FechaCreacion"],
+    ticket["Prioridad"]
+)
 
 # =====================================================
 # SLA
@@ -476,8 +518,8 @@ columnas_tabla = [
     "Categoria",
     "Prioridad",
     "Estado",
-    "Responsable",
-    "SLA"
+    "SLA",
+    "Responsable"
 ]
 
 st.dataframe(

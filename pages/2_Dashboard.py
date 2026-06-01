@@ -245,6 +245,15 @@ if ticket_df.empty:
 ticket = ticket_df.iloc[0]
 
 # =====================================================
+# SLA
+# =====================================================
+
+estado_sla, horas_restantes = calcular_sla(
+    ticket["FechaCreacion"],
+    ticket["Prioridad"]
+)
+
+# =====================================================
 # INFORMACIÓN DEL TICKET
 # =====================================================
 
@@ -261,6 +270,24 @@ with col1:
     st.write(f"**Área:** {ticket['Area']}")
     st.write(f"**Activo:** {ticket['Activo']}")
 
+if estado_sla == "En tiempo":
+
+    st.success(
+        f"SLA: {estado_sla}"
+    )
+
+elif estado_sla == "Próximo a vencer":
+
+    st.warning(
+        f"SLA: {estado_sla}"
+    )
+
+else:
+
+    st.error(
+        f"SLA: {estado_sla}"
+    )
+    
 with col2:
 
     st.write(f"**Reportó:** {ticket['Nombre']}")
@@ -420,6 +447,25 @@ if st.button("Guardar cambios"):
 
 st.divider()
 
+# =====================================================
+# CALCULAR SLA PARA TABLA
+# =====================================================
+
+sla_lista = []
+
+for _, fila in df_filtrado.iterrows():
+
+    estado_sla, _ = calcular_sla(
+        fila["FechaCreacion"],
+        fila["Prioridad"]
+    )
+
+    sla_lista.append(
+        estado_sla
+    )
+
+df_filtrado["SLA"] = sla_lista
+
 st.subheader("📋 Todos los tickets")
 
 columnas_tabla = [
@@ -430,7 +476,8 @@ columnas_tabla = [
     "Categoria",
     "Prioridad",
     "Estado",
-    "Responsable"
+    "Responsable",
+    "SLA"
 ]
 
 st.dataframe(

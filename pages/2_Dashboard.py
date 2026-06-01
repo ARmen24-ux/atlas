@@ -361,6 +361,25 @@ if str(ticket["ImagenApertura"]).strip() != "":
         )
 
 # =====================================================
+# FOTO FINAL
+# =====================================================
+
+if str(ticket["ImagenCierre"]).strip() != "":
+
+    if os.path.exists(
+        ticket["ImagenCierre"]
+    ):
+
+        st.write(
+            "### Evidencia final"
+        )
+
+        st.image(
+            ticket["ImagenCierre"],
+            width=500
+        )
+        
+# =====================================================
 # CAMBIO DE ESTADO
 # =====================================================
 
@@ -396,6 +415,27 @@ responsable = st.text_input(
 )
 
 # =====================================================
+# EVIDENCIA DE CIERRE
+# =====================================================
+
+imagen_cierre = None
+
+if estado_actual in [
+    "Resuelto",
+    "Verificado"
+]:
+
+    st.write(
+        "### 📷 Evidencia de cierre"
+    )
+
+    imagen_cierre = st.file_uploader(
+        "Fotografía del trabajo realizado",
+        type=["png", "jpg", "jpeg"],
+        key="img_cierre"
+    )
+
+# =====================================================
 # ACTUALIZACIÓN
 # =====================================================
 
@@ -416,6 +456,39 @@ if st.button("Guardar cambios"):
     df.loc[indice, "Responsable"] = responsable
 
     df.loc[indice, "FechaActualizacion"] = ahora
+
+# ==========================================
+# GUARDAR FOTO DE CIERRE
+# ==========================================
+
+if imagen_cierre is not None:
+
+    nombre_img = (
+        datetime.now().strftime(
+            "%Y%m%d%H%M%S"
+        )
+        + "_CIERRE_"
+        + imagen_cierre.name
+    )
+
+    ruta_img = os.path.join(
+        "evidencias",
+        nombre_img
+    )
+
+    with open(
+        ruta_img,
+        "wb"
+    ) as archivo:
+
+        archivo.write(
+            imagen_cierre.getbuffer()
+        )
+
+    df.loc[
+        indice,
+        "ImagenCierre"
+    ] = ruta_img
 
     # ==========================================
     # FECHAS AUTOMÁTICAS
@@ -622,7 +695,7 @@ if st.button(
         )
 
         st.rerun()
-        
+
 # =====================================================
 # HISTORIAL DEL TICKET
 # =====================================================

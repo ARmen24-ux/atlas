@@ -489,3 +489,45 @@ st.dataframe(
     use_container_width=True
 )
 
+# =====================================================
+# HISTORIAL DEL TICKET
+# =====================================================
+
+st.divider()
+
+st.subheader("🕓 Historial del ticket")
+
+try:
+
+    historial = pd.read_csv(
+        "data/historial.csv",
+        keep_default_na=False
+    )
+
+    historial_ticket = historial[
+        historial["Folio"] == ticket_folio
+    ]
+
+    if historial_ticket.empty:
+
+        st.info(
+            "No existen movimientos registrados para este ticket."
+        )
+
+    else:
+
+        historial_ticket = historial_ticket.sort_values(
+            by="Fecha",
+            ascending=False
+        )
+
+        st.dataframe(
+            historial_ticket,
+            use_container_width=True
+        )
+
+except Exception as e:
+
+    st.warning(
+        f"No fue posible cargar el historial: {e}"
+    )

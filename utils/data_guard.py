@@ -1,40 +1,98 @@
 import pandas as pd
 
 # =====================================================
-# ESQUEMA OFICIAL DEL SISTEMA ATLAS
+# ESQUEMA OFICIAL DE ATLAS
 # =====================================================
 
-ESQUEMA_BASE = {
-    "ID": "int",
-    "Fecha": "str",
-    "TipoUsuario": "str",
-    "Nombre": "str",
-    "Correo": "str",
-    "Edificio": "str",
-    "Area": "str",
-    "Activo": "str",
-    "Categoria": "str",
-    "Descripcion": "str",
-    "Impacto": "str",
-    "Estado": "str",
-    "Prioridad": "str",
-    "Imagen": "str"
+COLUMNAS_REQUERIDAS = {
+    "ID": "",
+    "Folio": "",
+
+    "FechaCreacion": "",
+    "FechaAsignacion": "",
+    "FechaResolucion": "",
+    "FechaCierre": "",
+    "FechaActualizacion": "",
+
+    "TipoUsuario": "",
+    "Nombre": "",
+    "Correo": "",
+
+    "Edificio": "",
+    "Area": "",
+    "UbicacionDetalle": "",
+
+    "Activo": "",
+    "Categoria": "",
+
+    "Impacto": "",
+    "Prioridad": "",
+
+    "Descripcion": "",
+
+    "Estado": "Pendiente",
+
+    "Responsable": "",
+
+    "ComentarioCierre": "",
+
+    "ImagenApertura": "",
+    "ImagenCierre": ""
 }
 
 # =====================================================
-# FUNCIÓN DE BLINDAJE
+# ASEGURAR ESQUEMA
 # =====================================================
 
 def asegurar_esquema(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Garantiza que el DataFrame tenga todas las columnas del sistema ATLAS.
-    Si faltan, las crea automáticamente sin romper la app.
+    Garantiza que el DataFrame tenga todas las columnas
+    requeridas por ATLAS.
+
+    Si una columna no existe se crea automáticamente.
     """
 
+    # Limpiar espacios en nombres de columnas
     df.columns = df.columns.str.strip()
 
-    for col, tipo in ESQUEMA_BASE.items():
-        if col not in df.columns:
-            df[col] = "Sin dato"
+    # Crear columnas faltantes
+    for columna, valor_default in COLUMNAS_REQUERIDAS.items():
+
+        if columna not in df.columns:
+            df[columna] = valor_default
+
+    # =================================================
+    # COMPATIBILIDAD CON VERSIONES ANTERIORES
+    # =================================================
+
+    # Imagen -> ImagenApertura
+    if "Imagen" in df.columns:
+
+        df["ImagenApertura"] = df["Imagen"]
+
+        df.drop(
+            columns=["Imagen"],
+            inplace=True,
+            errors="ignore"
+        )
+
+    # Fecha -> FechaCreacion
+    if "Fecha" in df.columns:
+
+        df["FechaCreacion"] = df["Fecha"]
+
+        df.drop(
+            columns=["Fecha"],
+            inplace=True,
+            errors="ignore"
+        )
+
+    # =================================================
+    # ORDENAR COLUMNAS
+    # =================================================
+
+    columnas_finales = list(COLUMNAS_REQUERIDAS.keys())
+
+    df = df.reindex(columns=columnas_finales)
 
     return df

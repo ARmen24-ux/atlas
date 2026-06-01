@@ -3,11 +3,17 @@ import pandas as pd
 from datetime import datetime
 import os
 
+from utils.data_guard import asegurar_esquema
+
 # =====================================================
 # CONFIGURACIÓN
 # =====================================================
 
-st.set_page_config(page_title="Reportar incidencia", layout="wide")
+st.set_page_config(
+    page_title="Reportar incidencia",
+    layout="wide"
+)
+
 st.title("📋 Reportar incidencia")
 
 # =====================================================
@@ -33,121 +39,288 @@ ubi.columns = ubi.columns.str.strip()
 act.columns = act.columns.str.strip()
 
 # =====================================================
-# CSV BASE
+# CARGA DE REPORTES
 # =====================================================
 
 if not os.path.exists(RUTA_CSV):
-    df_init = pd.DataFrame(columns=[
-        "ID","Folio","FechaCreacion","TipoUsuario","Nombre","Correo",
-        "Edificio","Area","UbicacionDetalle","Activo","Categoria",
-        "Prioridad","Descripcion","Impacto","Estado",
-        "Responsable","FechaActualizacion","Imagen"
-    ])
-    df_init.to_csv(RUTA_CSV, index=False)
+
+    df_init = pd.DataFrame()
+
+    df_init = asegurar_esquema(df_init)
+
+    df_init.to_csv(
+        RUTA_CSV,
+        index=False
+    )
 
 df = pd.read_csv(RUTA_CSV)
-df.columns = df.columns.str.strip()
+
+df = asegurar_esquema(df)
+
+df.to_csv(
+    RUTA_CSV,
+    index=False
+)
 
 # =====================================================
-# 🔥 UBICACIÓN (FUERA DEL FORM - FIX REAL STREAMLIT)
+# UBICACIÓN
 # =====================================================
 
-st.subheader("Ubicación")
+st.subheader("📍 Ubicación")
 
-edificio = st.selectbox("Edificio", ubi["Edificio"].unique())
+edificio = st.selectbox(
+    "Edificio",
+    ubi["Edificio"].unique()
+)
 
-areas_filtradas = ubi.loc[
-    ubi["Edificio"] == edificio, "Area"
-].dropna().unique().tolist()
+areas_filtradas = (
+    ubi.loc[
+        ubi["Edificio"] == edificio,
+        "Area"
+    ]
+    .dropna()
+    .unique()
+    .tolist()
+)
 
 if not areas_filtradas:
     areas_filtradas = ["Sin áreas registradas"]
 
-area = st.selectbox("Área", areas_filtradas)
+area = st.selectbox(
+    "Área",
+    areas_filtradas
+)
 
-ubicacion_detalle = st.text_input("Detalle adicional (opcional)")
+ubicacion_detalle = st.text_input(
+    "Detalle adicional (opcional)"
+)
 
 # =====================================================
-# FORMULARIO SOLO PARA ENVÍO
+# FORMULARIO
 # =====================================================
 
-with st.form("form"):
+with st.form("formulario_reporte"):
 
-    st.subheader("Datos del usuario")
+    st.subheader("👤 Datos del usuario")
 
-    tipo = st.selectbox("Tipo de usuario", ["Alumno","Docente","Administrativo"])
+    tipo = st.selectbox(
+        "Tipo de usuario",
+        [
+            "Alumno",
+            "Docente",
+            "Administrativo"
+        ]
+    )
+
     nombre = st.text_input("Nombre")
+
     correo = st.text_input("Correo")
 
     st.divider()
-    st.subheader("Problema")
 
-    activo = st.selectbox("Activo afectado", act["Activo"].unique())
+    st.subheader("🛠 Información de la incidencia")
 
-    categoria = st.selectbox("Categoría", [
-        "Electricidad","Plomería","Infraestructura","Mobiliario",
-        "Cómputo","Red","Seguridad","Limpieza","Otro"
-    ])
+    activo = st.selectbox(
+        "Activo afectado",
+        act["Activo"].unique()
+    )
 
-    prioridad = st.selectbox("Prioridad", ["Baja","Media","Alta","Crítica"])
+    categoria = st.selectbox(
+        "Categoría",
+        [
+            "Electricidad",
+            "Plomería",
+            "Infraestructura",
+            "Mobiliario",
+            "Cómputo",
+            "Red",
+            "Seguridad",
+            "Limpieza",
+            "Otro"
+        ]
+    )
 
-    descripcion = st.text_area("Descripción")
+    prioridad = st.selectbox(
+        "Prioridad",
+        [
+            "Baja",
+            "Media",
+            "Alta",
+            "Crítica"
+        ]
+    )
 
-    impacto = st.selectbox("Impacto", [
-        "No afecta actividades",
-        "Afecta parcialmente",
-        "Impide actividades"
-    ])
+    descripcion = st.text_area(
+        "Descripción del problema"
+    )
 
-    imagen = st.file_uploader("Evidencia", type=["png","jpg","jpeg"])
+    impacto = st.selectbox(
+        "Impacto",
+        [
+            "No afecta actividades",
+            "Afecta parcialmente",
+            "Impide actividades"
+        ]
+    )
 
-    enviar = st.form_submit_button("Enviar reporte")
+    imagen = st.file_uploader(
+        "Evidencia fotográfica",
+        type=["png", "jpg", "jpeg"]
+    )
+
+    enviar = st.form_submit_button(
+        "Enviar reporte"
+    )
 
 # =====================================================
-# GUARDAR
+# GUARDAR REPORTE
 # =====================================================
 
 if enviar:
+
+    if nombre.strip() == "":
+        st.error("Ingresa tu nombre")
+        st.stop()
+
+    if correo.strip() == "":
+        st.error("Ingresa un correo")
+        st.stop()
 
     if descripcion.strip() == "":
         st.error("Describe el problema")
         st.stop()
 
+    # =================================================
+    # IMAGEN APERTURA
+    # =================================================
+
     ruta_img = ""
 
-    if imagen:
-        nombre_img = datetime.now().strftime("%Y%m%d%H%M%S") + "_" + imagen.name
-        ruta_img = os.path.join(CARPETA_IMG, nombre_img)
+    if imagen is not None:
 
-        with open(ruta_img, "wb") as f:
-            f.write(imagen.getbuffer())
+        nombre_img = (
+            datetime.now().strftime("%Y%m%d%H%M%S")
+            + "_"
+            + imagen.name
+        )
 
-    folio = f"UTG-2026-{len(df)+1:05d}"
+        ruta_img = os.path.join(
+            CARPETA_IMG,
+            nombre_img
+        )
+
+        with open(ruta_img, "wb") as archivo:
+            archivo.write(
+                imagen.getbuffer()
+            )
+
+    # =================================================
+    # ID SEGURO
+    # =================================================
+
+    if len(df) == 0:
+
+        nuevo_id = 1
+
+    else:
+
+        nuevo_id = (
+            pd.to_numeric(
+                df["ID"],
+                errors="coerce"
+            )
+            .fillna(0)
+            .max()
+            + 1
+        )
+
+        nuevo_id = int(nuevo_id)
+
+    # =================================================
+    # FOLIO
+    # =================================================
+
+    folio = f"UTG-2026-{nuevo_id:05d}"
+
+    fecha_actual = datetime.now().strftime(
+        "%Y-%m-%d %H:%M"
+    )
+
+    # =================================================
+    # NUEVO REPORTE
+    # =================================================
 
     nuevo = {
-        "ID": len(df)+1,
+
+        "ID": nuevo_id,
+
         "Folio": folio,
-        "FechaCreacion": datetime.now().strftime("%Y-%m-%d %H:%M"),
+
+        "FechaCreacion": fecha_actual,
+
+        "FechaAsignacion": "",
+
+        "FechaResolucion": "",
+
+        "FechaCierre": "",
+
+        "FechaActualizacion": fecha_actual,
+
         "TipoUsuario": tipo,
+
         "Nombre": nombre,
+
         "Correo": correo,
+
         "Edificio": edificio,
+
         "Area": area,
+
         "UbicacionDetalle": ubicacion_detalle,
+
         "Activo": activo,
+
         "Categoria": categoria,
-        "Prioridad": prioridad,
-        "Descripcion": descripcion,
+
         "Impacto": impacto,
+
+        "Prioridad": prioridad,
+
+        "Descripcion": descripcion,
+
         "Estado": "Pendiente",
+
         "Responsable": "",
-        "FechaActualizacion": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "Imagen": ruta_img
+
+        "ComentarioCierre": "",
+
+        "ImagenApertura": ruta_img,
+
+        "ImagenCierre": ""
     }
 
-    df = pd.concat([df, pd.DataFrame([nuevo])], ignore_index=True)
-    df.to_csv(RUTA_CSV, index=False)
+    # =================================================
+    # GUARDAR
+    # =================================================
 
-    st.success(f"Reporte enviado: {folio}")
+    df = pd.concat(
+        [
+            df,
+            pd.DataFrame([nuevo])
+        ],
+        ignore_index=True
+    )
+
+    df = asegurar_esquema(df)
+
+    df.to_csv(
+        RUTA_CSV,
+        index=False
+    )
+
+    st.success(
+        f"Reporte enviado correctamente.\n\nFolio: {folio}"
+    )
+
     st.rerun()
     

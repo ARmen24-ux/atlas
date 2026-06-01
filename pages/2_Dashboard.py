@@ -332,7 +332,7 @@ if st.button("Guardar cambios"):
         "%Y-%m-%d %H:%M"
     )
 
-estado_anterior = ticket["Estado"]
+    estado_anterior = ticket["Estado"]
 
     indice = df[
         df["Folio"] == ticket_folio
@@ -392,17 +392,17 @@ estado_anterior = ticket["Estado"]
                 indice,
                 "FechaCierre"
             ] = ahora
-    
+
     registrar_movimiento(
-    folio=ticket_folio,
-    usuario=st.session_state.get(
-        "usuario",
-        "Sistema"
-    ),
-    accion="Cambio de estado",
-    detalle=f"{estado_anterior} → {nuevo_estado}"
+        folio=ticket_folio,
+        usuario=st.session_state.get(
+            "usuario",
+            "Sistema"
+        ),
+        accion="Cambio de estado",
+        detalle=f"{estado_anterior} → {nuevo_estado}"
     )
-   
+
     df.to_csv(
         RUTA_CSV,
         index=False
@@ -413,7 +413,6 @@ estado_anterior = ticket["Estado"]
     )
 
     st.rerun()
-
 # =====================================================
 # TABLA GENERAL
 # =====================================================

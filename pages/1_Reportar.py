@@ -70,8 +70,11 @@ registrar_movimiento(
     detalle="Reporte creado por usuario"
 )
 
-st.success(...)
+st.success(
+    f"Reporte enviado correctamente.\n\nFolio: {folio}"
+)
 
+st.rerun()
 # =====================================================
 # UBICACIÓN
 # =====================================================

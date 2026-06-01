@@ -1,1 +1,1 @@
-ID,Fecha,TipoUsuario,Nombre,Correo,Edificio,Area,Activo,Categoria,Descripcion,Impacto,Estado,Imagen
+ID,Folio,FechaCreacion,FechaAsignacion,FechaResolucion,FechaCierre,FechaActualizacion,TipoUsuario,Nombre,Correo,Edificio,Area,UbicacionDetalle,Activo,Categoria,Impacto,Prioridad,Descripcion,Estado,Responsable,ComentarioCierre,ImagenApertura,ImagenCierre

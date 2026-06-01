@@ -10,6 +10,14 @@ from utils.comentarios import (
     agregar_comentario,
     obtener_comentarios
 )
+
+def aplicar_sla(df):
+    df = df.copy()
+    df["SLA"] = [
+        calcular_sla(f["FechaCreacion"], f["Prioridad"])[0]
+        for _, f in df.iterrows()
+    ]
+    return df
 # =====================================================
 # CONFIGURACIÓN
 # =====================================================
@@ -119,31 +127,9 @@ estado_filtro = st.sidebar.multiselect(
     default=sorted(df["Estado"].dropna().unique())
 )
 
-df_filtrado = df[
-    df["Estado"].isin(estado_filtro)
-]
-
-# =====================================================
-# CÁLCULO DE SLA
-# =====================================================
-
-sla_estado = []
-sla_horas = []
-
-for _, fila in df_filtrado.iterrows():
-
-    estado_sla, horas = calcular_sla(
-        fila["FechaCreacion"],
-        fila["Prioridad"]
-    )
-
-    sla_estado.append(estado_sla)
-    sla_horas.append(horas)
-
-df_filtrado = df_filtrado.copy()
-
-df_filtrado["SLA"] = sla_estado
-df_filtrado["HorasRestantes"] = sla_horas
+df_filtrado = aplicar_sla(
+    df[df["Estado"].isin(estado_filtro)]
+)
 
 # =====================================================
 # KPIs
@@ -284,11 +270,6 @@ if ticket_df.empty:
 
 ticket = ticket_df.iloc[0]
 
-estado_sla, horas_restantes = calcular_sla(
-    ticket["FechaCreacion"],
-    ticket["Prioridad"]
-)
-
 # =====================================================
 # SLA
 # =====================================================
@@ -378,7 +359,7 @@ if str(ticket["ImagenCierre"]).strip() != "":
             ticket["ImagenCierre"],
             width=500
         )
-        
+
 # =====================================================
 # CAMBIO DE ESTADO
 # =====================================================
@@ -394,6 +375,10 @@ opciones_validas = TRANSICIONES.get(
     []
 )
 
+# =====================================================
+# VALIDACIÓN DE TRANSICIÓN
+# =====================================================
+
 if len(opciones_validas) == 0:
 
     st.info(
@@ -408,6 +393,15 @@ else:
         "Nuevo estado",
         opciones_validas
     )
+
+    # 🔥 MEJORA CLAVE: detectar si realmente hay cambio
+    if nuevo_estado == estado_actual:
+        st.warning("No has cambiado el estado del ticket.")
+        st.stop()
+
+# =====================================================
+# RESPONSABLE
+# =====================================================
 
 responsable = st.text_input(
     "Responsable",
@@ -441,71 +435,47 @@ if estado_actual in [
 
 if st.button("Guardar cambios"):
 
-    ahora = datetime.now().strftime(
-        "%Y-%m-%d %H:%M"
-    )
-
+    ahora = datetime.now().strftime("%Y-%m-%d %H:%M")
     estado_anterior = ticket["Estado"]
 
-    indice = df[
-        df["Folio"] == ticket_folio
-    ].index
+    idx = df.index[df["Folio"] == ticket_folio]
 
-    df.loc[indice, "Estado"] = nuevo_estado
+    if len(idx) == 0:
+        st.error("Ticket no encontrado")
+        st.stop()
 
-    df.loc[indice, "Responsable"] = responsable
+    idx = idx[0]
 
-    df.loc[indice, "FechaActualizacion"] = ahora
+    cambios = {}
 
-# ==========================================
-# GUARDAR FOTO DE CIERRE
-# ==========================================
+    if nuevo_estado != estado_anterior:
+        cambios["Estado"] = nuevo_estado
 
-if imagen_cierre is not None:
+    if responsable != ticket["Responsable"]:
+        cambios["Responsable"] = responsable
 
-    nombre_img = (
-        datetime.now().strftime(
-            "%Y%m%d%H%M%S"
-        )
-        + "_CIERRE_"
-        + imagen_cierre.name
-    )
+    cambios["FechaActualizacion"] = ahora
 
-    ruta_img = os.path.join(
-        "evidencias",
-        nombre_img
-    )
-
-    with open(
-        ruta_img,
-        "wb"
-    ) as archivo:
-
-        archivo.write(
-            imagen_cierre.getbuffer()
-        )
-
-    df.loc[
-        indice,
-        "ImagenCierre"
-    ] = ruta_img
+    # aplicar cambios de forma segura
+    for k, v in cambios.items():
+        df.loc[idx, k] = v
 
     # ==========================================
     # FECHAS AUTOMÁTICAS
     # ==========================================
 
-    if nuevo_estado == "Asignado":
+    if nuevo_estado != estado_anterior:
 
         fecha_actual = str(
             df.loc[
-                indice,
+                idx,
                 "FechaAsignacion"
             ].values[0]
         )
 
         if fecha_actual.strip() == "":
             df.loc[
-                indice,
+                idx,
                 "FechaAsignacion"
             ] = ahora
 
@@ -513,14 +483,14 @@ if imagen_cierre is not None:
 
         fecha_actual = str(
             df.loc[
-                indice,
+                idx,
                 "FechaResolucion"
             ].values[0]
         )
 
         if fecha_actual.strip() == "":
             df.loc[
-                indice,
+                idx,
                 "FechaResolucion"
             ] = ahora
 
@@ -528,17 +498,35 @@ if imagen_cierre is not None:
 
         fecha_actual = str(
             df.loc[
-                indice,
+                idx,
                 "FechaCierre"
             ].values[0]
         )
 
         if fecha_actual.strip() == "":
             df.loc[
-                indice,
+                idx,
                 "FechaCierre"
             ] = ahora
+    
+    # ====== IMAGEN CIERRE ======
+    if imagen_cierre is not None:
 
+        os.makedirs("evidencias", exist_ok=True)
+
+        nombre_img = (
+            datetime.now().strftime("%Y%m%d%H%M%S")
+            + "_CIERRE_"
+            + imagen_cierre.name
+        )
+
+        ruta_img = os.path.join("evidencias", nombre_img)
+
+        with open(ruta_img, "wb") as f:
+            f.write(imagen_cierre.getbuffer())
+
+        df.loc[idx, "ImagenCierre"] = ruta_img
+        
     registrar_movimiento(
         folio=ticket_folio,
         usuario=st.session_state.get(
@@ -569,22 +557,15 @@ st.divider()
 # CALCULAR SLA PARA TABLA
 # =====================================================
 
-sla_lista = []
-
-for _, fila in df_filtrado.iterrows():
-
-    estado_sla, _ = calcular_sla(
-        fila["FechaCreacion"],
-        fila["Prioridad"]
-    )
-
-    sla_lista.append(
-        estado_sla
-    )
-
-df_filtrado["SLA"] = sla_lista
 
 st.subheader("📋 Todos los tickets")
+
+df_filtrado = df_filtrado.copy()
+
+df_filtrado["SLA"] = [
+    calcular_sla(f["FechaCreacion"], f["Prioridad"])[0]
+    for _, f in df_filtrado.iterrows()
+]
 
 columnas_tabla = [
     "Folio",
@@ -596,6 +577,7 @@ columnas_tabla = [
     "Estado",
     "SLA",
     "Responsable"
+    "HorasRestantes"
 ]
 
 st.dataframe(

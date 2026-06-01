@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 from utils.historial import registrar_movimiento
 from utils.data_guard import asegurar_esquema
+from utils.sla import calcular_sla
 
 # =====================================================
 # CONFIGURACIÓN
@@ -441,11 +442,3 @@ st.dataframe(
     use_container_width=True
 )
 
-st.dataframe(
-    df_filtrado[columnas_tabla]
-    .sort_values(
-        by="FechaCreacion",
-        ascending=False
-    ),
-    use_container_width=True
-)

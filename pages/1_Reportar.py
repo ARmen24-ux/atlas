@@ -63,18 +63,7 @@ df.to_csv(
     index=False
 )
 
-registrar_movimiento(
-    folio=folio,
-    usuario=nombre,
-    accion="Creación",
-    detalle="Reporte creado por usuario"
-)
 
-st.success(
-    f"Reporte enviado correctamente.\n\nFolio: {folio}"
-)
-
-st.rerun()
 # =====================================================
 # UBICACIÓN
 # =====================================================
@@ -326,14 +315,20 @@ if enviar:
 
     df = asegurar_esquema(df)
 
-    df.to_csv(
-        RUTA_CSV,
-        index=False
-    )
+  df.to_csv(
+    RUTA_CSV,
+    index=False
+)
 
-    st.success(
-        f"Reporte enviado correctamente.\n\nFolio: {folio}"
-    )
+registrar_movimiento(
+    folio=folio,
+    usuario=nombre,
+    accion="Creación",
+    detalle="Reporte creado por usuario"
+)
 
-    st.rerun()
-    
+st.success(
+    f"Reporte enviado correctamente.\n\nFolio: {folio}"
+)
+
+st.rerun()

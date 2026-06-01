@@ -440,3 +440,12 @@ st.dataframe(
     ),
     use_container_width=True
 )
+
+st.dataframe(
+    df_filtrado[columnas_tabla]
+    .sort_values(
+        by="FechaCreacion",
+        ascending=False
+    ),
+    use_container_width=True
+)

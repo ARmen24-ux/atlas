@@ -15,7 +15,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("📋 Reportar incidencia")
+st.title(" Reportar incidencia")
 
 # =====================================================
 # RUTAS
@@ -71,7 +71,7 @@ df.to_csv(
 # UBICACIÓN
 # =====================================================
 
-st.subheader("📍 Ubicación")
+st.subheader(" Ubicación")
 
 edificio = st.selectbox(
     "Edificio",
@@ -106,7 +106,7 @@ ubicacion_detalle = st.text_input(
 
 with st.form("formulario_reporte"):
 
-    st.subheader("👤 Datos del usuario")
+    st.subheader(" Datos del usuario")
 
     tipo = st.selectbox(
         "Tipo de usuario",
@@ -123,7 +123,7 @@ with st.form("formulario_reporte"):
 
     st.divider()
 
-    st.subheader("🛠 Información de la incidencia")
+    st.subheader(" Información de la incidencia")
 
     activo = st.selectbox(
         "Activo afectado",

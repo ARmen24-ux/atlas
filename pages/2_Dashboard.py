@@ -27,7 +27,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("📊 ATLAS - Panel de Mantenimiento")
+st.title("ATLAS - Panel de Mantenimiento")
 
 # =====================================================
 # PROTECCIÓN DE ACCESO
@@ -135,7 +135,7 @@ df_filtrado = aplicar_sla(
 # KPIs
 # =====================================================
 
-st.subheader("📌 Indicadores")
+st.subheader(" Indicadores")
 
 en_tiempo = len(
     df_filtrado[
@@ -182,7 +182,7 @@ col3.metric(
 )
 
 col4.metric(
-    "📈 SLA %",
+    " SLA %",
     f"{cumplimiento}%"
 )
 
@@ -196,7 +196,7 @@ colA, colB = st.columns(2)
 
 with colA:
 
-    st.subheader("📊 Tickets por estado")
+    st.subheader(" Tickets por estado")
 
     estado_counts = (
         df_filtrado
@@ -221,7 +221,7 @@ with colA:
 
 with colB:
 
-    st.subheader("📊 Tickets por prioridad")
+    st.subheader(" Tickets por prioridad")
 
     prioridad_counts = (
         df_filtrado
@@ -249,7 +249,7 @@ st.divider()
 # GESTIÓN DE TICKETS
 # =====================================================
 
-st.subheader("🛠 Gestión de tickets")
+st.subheader(" Gestión de tickets")
 
 if len(df_filtrado) == 0:
     st.warning("No hay tickets disponibles")

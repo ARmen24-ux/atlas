@@ -6,7 +6,10 @@ import os
 from utils.historial import registrar_movimiento
 from utils.data_guard import asegurar_esquema
 from utils.sla import calcular_sla
-
+from utils.comentarios import (
+    agregar_comentario,
+    obtener_comentarios
+)
 # =====================================================
 # CONFIGURACIÓN
 # =====================================================
@@ -531,6 +534,95 @@ st.dataframe(
     use_container_width=True
 )
 
+# =====================================================
+# Bitácora técnica
+# =====================================================
+
+st.divider()
+
+st.subheader("📝 Bitácora técnica")
+
+comentarios_ticket = obtener_comentarios(
+    ticket_folio
+)
+
+if comentarios_ticket.empty:
+
+    st.info(
+        "No existen comentarios registrados."
+    )
+
+else:
+
+    comentarios_ticket = comentarios_ticket.sort_values(
+        by="Fecha",
+        ascending=False
+    )
+
+    for _, comentario in comentarios_ticket.iterrows():
+
+        with st.container():
+
+            st.markdown(
+                f"""
+                **{comentario['Fecha']}**
+
+                👤 {comentario['Usuario']}
+
+                {comentario['Comentario']}
+                """
+            )
+
+            st.divider()
+
+# =====================================================
+# NUEVO COMENTARIO
+# =====================================================
+
+st.write("### Agregar comentario")
+
+nuevo_comentario = st.text_area(
+    "Comentario técnico",
+    key="nuevo_comentario"
+)
+
+if st.button(
+    "Guardar comentario"
+):
+
+    if nuevo_comentario.strip() == "":
+
+        st.warning(
+            "Escribe un comentario."
+        )
+
+    else:
+
+        agregar_comentario(
+            folio=ticket_folio,
+            usuario=st.session_state.get(
+                "usuario",
+                "Sistema"
+            ),
+            comentario=nuevo_comentario
+        )
+
+        registrar_movimiento(
+            folio=ticket_folio,
+            usuario=st.session_state.get(
+                "usuario",
+                "Sistema"
+            ),
+            accion="Comentario",
+            detalle=nuevo_comentario
+        )
+
+        st.success(
+            "Comentario agregado."
+        )
+
+        st.rerun()
+        
 # =====================================================
 # HISTORIAL DEL TICKET
 # =====================================================

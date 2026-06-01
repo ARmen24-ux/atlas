@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 import os
-
+from utils.historial import registrar_movimiento
 from utils.data_guard import asegurar_esquema
 
 # =====================================================
@@ -332,6 +332,8 @@ if st.button("Guardar cambios"):
         "%Y-%m-%d %H:%M"
     )
 
+estado_anterior = ticket["Estado"]
+
     indice = df[
         df["Folio"] == ticket_folio
     ].index
@@ -390,7 +392,17 @@ if st.button("Guardar cambios"):
                 indice,
                 "FechaCierre"
             ] = ahora
-
+    
+    registrar_movimiento(
+    folio=ticket_folio,
+    usuario=st.session_state.get(
+        "usuario",
+        "Sistema"
+    ),
+    accion="Cambio de estado",
+    detalle=f"{estado_anterior} → {nuevo_estado}"
+    )
+   
     df.to_csv(
         RUTA_CSV,
         index=False

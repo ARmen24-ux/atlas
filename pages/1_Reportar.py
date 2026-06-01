@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 
 from utils.data_guard import asegurar_esquema
+from utils.historial import registrar_movimiento
 
 # =====================================================
 # CONFIGURACIÓN
@@ -61,6 +62,15 @@ df.to_csv(
     RUTA_CSV,
     index=False
 )
+
+registrar_movimiento(
+    folio=folio,
+    usuario=nombre,
+    accion="Creación",
+    detalle="Reporte creado por usuario"
+)
+
+st.success(...)
 
 # =====================================================
 # UBICACIÓN

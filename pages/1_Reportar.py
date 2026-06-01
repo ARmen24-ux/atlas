@@ -54,7 +54,10 @@ if not os.path.exists(RUTA_CSV):
         index=False
     )
 
-df = pd.read_csv(RUTA_CSV)
+df = pd.read_csv(
+    RUTA_CSV,
+    keep_default_na=False
+)
 
 df = asegurar_esquema(df)
 
@@ -315,20 +318,20 @@ if enviar:
 
     df = asegurar_esquema(df)
 
-  df.to_csv(
-    RUTA_CSV,
-    index=False
-)
+    df.to_csv(
+        RUTA_CSV,
+        index=False
+    )
 
-registrar_movimiento(
-    folio=folio,
-    usuario=nombre,
-    accion="Creación",
-    detalle="Reporte creado por usuario"
-)
+    registrar_movimiento(
+        folio=folio,
+        usuario=nombre,
+        accion="Creación",
+        detalle="Reporte creado por usuario"
+    )
 
-st.success(
-    f"Reporte enviado correctamente.\n\nFolio: {folio}"
-)
+    st.success(
+        f"Reporte enviado correctamente.\n\nFolio: {folio}"
+    )
 
-st.rerun()
+    st.rerun()

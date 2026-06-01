@@ -43,9 +43,46 @@ if not os.path.exists(RUTA_CSV):
     st.error("No existe el archivo de reportes")
     st.stop()
 
-df = pd.read_csv(RUTA_CSV)
+df = pd.read_csv(
+    RUTA_CSV,
+    keep_default_na=False
+)
 
 df = asegurar_esquema(df)
+
+# =====================================================
+# FORZAR COLUMNAS DE TEXTO
+# =====================================================
+
+columnas_texto = [
+    "Folio",
+    "TipoUsuario",
+    "Nombre",
+    "Correo",
+    "Edificio",
+    "Area",
+    "UbicacionDetalle",
+    "Activo",
+    "Categoria",
+    "Impacto",
+    "Prioridad",
+    "Descripcion",
+    "Estado",
+    "Responsable",
+    "ComentarioCierre",
+    "ImagenApertura",
+    "ImagenCierre"
+]
+
+for col in columnas_texto:
+
+    if col in df.columns:
+
+        df[col] = (
+            df[col]
+            .fillna("")
+            .astype(str)
+        )
 
 # =====================================================
 # NORMALIZACIÓN

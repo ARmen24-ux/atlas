@@ -1,230 +1,58 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
 import os
+
 from utils.data_guard import asegurar_esquema
 
 # =====================================================
-# CONFIGURACION DE PAGINA
+# CONFIGURACIÓN
 # =====================================================
 
 st.set_page_config(
     page_title="ATLAS",
+    page_icon="🏫",
     layout="wide"
 )
 
 # =====================================================
-# ESTILOS CSS
+# ESTILO
 # =====================================================
 
 st.markdown("""
 <style>
 
-/* =====================================================
-FONDO GENERAL
-===================================================== */
-
-.stApp {
-    background-color: #0e1117;
+.main-title{
+    text-align:center;
+    font-size:60px;
+    font-weight:700;
 }
 
-/* =====================================================
-CONTENEDOR PRINCIPAL
-===================================================== */
-
-.block-container {
-    padding-top: 2rem;
-    padding-left: 3rem;
-    padding-right: 3rem;
+.subtitle{
+    text-align:center;
+    color:#888;
+    font-size:20px;
 }
 
-/* =====================================================
-TITULO PRINCIPAL
-===================================================== */
-
-.titulo-Atlas {
-    text-align: center;
-    font-size: 5rem;
-    font-weight: 800;
-    letter-spacing: 8px;
-    color: white;
-    margin-bottom: 0;
-    margin-top: 10px;
-}
-
-/* =====================================================
-SUBTITULO
-===================================================== */
-
-.subtitulo {
-    text-align: center;
-    font-size: 1.6rem;
-    color: #9ca3af;
-    margin-top: 0;
-}
-
-/* =====================================================
-DESCRIPCION
-===================================================== */
-
-.descripcion {
-    text-align: center;
-    font-size: 1rem;
-    color: #d1d5db;
-    margin-bottom: 40px;
-}
-
-/* =====================================================
-SIDEBAR
-===================================================== */
-
-section[data-testid="stSidebar"] {
-    background-color: #1b222c;
-    border-right: 1px solid #2d3748;
-}
-
-/* TITULOS SIDEBAR */
-
-section[data-testid="stSidebar"] h1,
-section[data-testid="stSidebar"] h2,
-section[data-testid="stSidebar"] h3 {
-    color: white;
-}
-
-/* =====================================================
-INPUTS Y TEXTAREA
-===================================================== */
-
-.stTextInput input,
-.stTextArea textarea {
-    background-color: #242c38;
-    color: white;
-    border: 1px solid #3b4657;
-    border-radius: 10px;
-}
-
-/* =====================================================
-SELECTBOX
-===================================================== */
-
-div[data-baseweb="select"] > div {
-    background-color: #242c38;
-    border: 1px solid #3b4657;
-    border-radius: 10px;
-}
-
-/* =====================================================
-FILE UPLOADER
-===================================================== */
-
-section[data-testid="stFileUploader"] {
-    background-color: #242c38;
-    border-radius: 10px;
-    padding: 10px;
-    border: 1px solid #3b4657;
-}
-
-/* =====================================================
-BOTONES
-===================================================== */
-
-.stButton > button {
-    width: 100%;
-    background-color: #334155;
-    color: white;
-    border-radius: 10px;
-    border: none;
-    height: 45px;
-    font-size: 15px;
-    transition: 0.2s ease;
-}
-
-.stButton > button:hover {
-    background-color: #475569;
-    color: white;
-}
-
-/* =====================================================
-METRICAS
-===================================================== */
-
-div[data-testid="stMetric"] {
-    background-color: #161b22;
-    border: 1px solid #30363d;
-    border-radius: 14px;
-    padding: 20px;
-}
-
-/* =====================================================
-TEXTO DE METRICAS
-===================================================== */
-
-div[data-testid="stMetricLabel"] {
-    color: #9ca3af;
-    font-size: 16px;
-}
-
-div[data-testid="stMetricValue"] {
-    color: white;
-}
-
-/* =====================================================
-TABLAS
-===================================================== */
-
-div[data-testid="stDataFrame"] {
-    border: 1px solid #30363d;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-/* =====================================================
-LINEAS DIVISORAS
-===================================================== */
-
-hr {
-    border-color: #30363d;
+.kpi-card{
+    padding:10px;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 # =====================================================
-# RUTAS
+# CARGA DE DATOS
 # =====================================================
 
-RUTA_CSV = os.path.join("data", "reportes.csv")
-CARPETA_EVIDENCIAS = "evidencias"
-
-# =====================================================
-# CREAR CARPETAS
-# =====================================================
-
-os.makedirs("data", exist_ok=True)
-os.makedirs(CARPETA_EVIDENCIAS, exist_ok=True)
-
-# =====================================================
-# CREAR CSV SI NO EXISTE
-# =====================================================
+RUTA_CSV = "data/reportes.csv"
 
 if not os.path.exists(RUTA_CSV):
 
-    df_inicial = pd.DataFrame(columns=[
-        "ID",
-        "Fecha",
-        "Area",
-        "Problema",
-        "Descripcion",
-        "Prioridad",
-        "Estado",
-        "Imagen"
-    ])
+    st.error(
+        "No existe data/reportes.csv"
+    )
 
-    df_inicial.to_csv(RUTA_CSV, index=False)
-
-# =====================================================
-# LEER CSV
-# =====================================================
+    st.stop()
 
 df = pd.read_csv(
     RUTA_CSV,
@@ -233,219 +61,221 @@ df = pd.read_csv(
 
 df = asegurar_esquema(df)
 
-df.to_csv(
-    RUTA_CSV,
-    index=False
-)
-
 # =====================================================
 # HEADER
 # =====================================================
 
-st.markdown("""
-<h1 class="titulo-atlas">
-ATLAS
-</h1>
+st.markdown(
+    """
+    <div class='main-title'>
+    ATLAS
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-<p class="subtitulo">
-Sistema de reportes de mantenimiento escolar
-</p>
+st.markdown(
+    """
+    <div class='subtitle'>
+    Sistema Institucional de Gestión de Mantenimiento
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-<p class="descripcion">
-Plataforma institucional para el registro, monitoreo y seguimiento
-de incidencias dentro de las instalaciones escolares.
-</p>
-""", unsafe_allow_html=True)
+st.write("")
+
+st.info(
+    """
+ATLAS permite registrar, monitorear y dar seguimiento
+a incidencias de mantenimiento dentro de las instalaciones
+de la universidad.
+
+La plataforma centraliza reportes, evidencias fotográficas,
+historial de movimientos y métricas operativas para mejorar
+los tiempos de respuesta y la trazabilidad de cada incidencia.
+"""
+)
+
+# =====================================================
+# KPI
+# =====================================================
+
+total_tickets = len(df)
+
+pendientes = len(
+    df[
+        df["Estado"] == "Pendiente"
+    ]
+)
+
+en_proceso = len(
+    df[
+        df["Estado"].isin(
+            [
+                "Asignado",
+                "En proceso"
+            ]
+        )
+    ]
+)
+
+resueltos = len(
+    df[
+        df["Estado"] == "Resuelto"
+    ]
+)
+
+cerrados = len(
+    df[
+        df["Estado"] == "Cerrado"
+    ]
+)
+
+col1, col2, col3, col4, col5 = st.columns(5)
+
+with col1:
+    st.metric(
+        "Tickets",
+        total_tickets
+    )
+
+with col2:
+    st.metric(
+        "Pendientes",
+        pendientes
+    )
+
+with col3:
+    st.metric(
+        "En proceso",
+        en_proceso
+    )
+
+with col4:
+    st.metric(
+        "Resueltos",
+        resueltos
+    )
+
+with col5:
+    st.metric(
+        "Cerrados",
+        cerrados
+    )
 
 st.divider()
 
 # =====================================================
-# METRICAS
+# FLUJO
 # =====================================================
 
-total_reportes = len(df)
+col_a, col_b = st.columns(2)
 
-pendientes = len(df[df["Estado"] == "Pendiente"])
+with col_a:
 
-en_proceso = len(df[df["Estado"] == "En proceso"])
+    st.subheader(
+        "Flujo de atención"
+    )
 
-if "Prioridad" not in df.columns:
-    df["Prioridad"] = "Normal"
+    st.markdown(
+        """
+1. Reporte de incidencia
 
-urgentes = len(df[df["Prioridad"] == "Urgente"])
+2. Validación
 
-col1, col2, col3, col4 = st.columns(4)
+3. Asignación
 
-col1.metric("Total", total_reportes)
-col2.metric("Pendientes", pendientes)
-col3.metric("En proceso", en_proceso)
-col4.metric("Urgentes", urgentes)
+4. Atención
+
+5. Resolución
+
+6. Verificación
+
+7. Cierre
+"""
+    )
+
+with col_b:
+
+    st.subheader(
+        "Beneficios"
+    )
+
+    st.markdown(
+        """
+✅ Evidencias fotográficas
+
+✅ Historial completo
+
+✅ Seguimiento en tiempo real
+
+✅ Indicadores operativos
+
+✅ Control de mantenimiento
+
+✅ Trazabilidad de tickets
+
+✅ Centralización de incidencias
+"""
+    )
 
 st.divider()
 
 # =====================================================
-# FORMULARIO
+# ESTADÍSTICAS RÁPIDAS
 # =====================================================
 
-with st.sidebar.form("formulario_reporte"):
+st.subheader(
+    "Distribución por prioridad"
+)
 
-    area = st.selectbox(
-        "Área afectada",
-        [
-            "Salón",
-            "Laboratorio",
-            "Oficina",
-            "Auditorio",
-            "Baño",
-            "Pasillo",
-            "Taller",
-            "Otro"
-        ]
+prioridad_counts = (
+    df["Prioridad"]
+    .value_counts()
+)
+
+if not prioridad_counts.empty:
+
+    st.bar_chart(
+        prioridad_counts
     )
 
-    problema = st.text_input("Problema detectado")
-
-    descripcion = st.text_area("Descripción del problema")
-
-    prioridad = st.selectbox(
-        "Prioridad",
-        [
-            "Baja",
-            "Media",
-            "Alta",
-            "Urgente"
-        ]
-    )
-
-    imagen = st.file_uploader(
-        "Subir evidencia",
-        type=["png", "jpg", "jpeg"]
-    )
-
-    enviar = st.form_submit_button("Guardar reporte")
+st.divider()
 
 # =====================================================
-# GUARDAR REPORTE
+# ÚLTIMOS REPORTES
 # =====================================================
 
-if enviar:
+st.subheader(
+    "Últimos reportes registrados"
+)
 
-    ruta_imagen = ""
+columnas = [
+    "Folio",
+    "FechaCreacion",
+    "Edificio",
+    "Area",
+    "Categoria",
+    "Prioridad",
+    "Estado"
+]
 
-    if imagen is not None:
+columnas = [
+    c
+    for c in columnas
+    if c in df.columns
+]
 
-        nombre_imagen = (
-            datetime.now().strftime("%Y%m%d%H%M%S")
-            + "_"
-            + imagen.name
+if len(df) > 0:
+
+    tabla = (
+        df[columnas]
+        .sort_values(
+            by="FechaCreacion",
+            ascending=False
         )
-
-        ruta_imagen = os.path.join(
-            CARPETA_EVIDENCIAS,
-            nombre_imagen
-        )
-
-        with open(ruta_imagen, "wb") as archivo:
-            archivo.write(imagen.getbuffer())
-
-    nuevo_id = len(df) + 1
-
-    nuevo_reporte = {
-        "ID": nuevo_id,
-        "Fecha": datetime.now().strftime("%d/%m/%Y %H:%M"),
-        "Area": area,
-        "Problema": problema,
-        "Descripcion": descripcion,
-        "Prioridad": prioridad,
-        "Estado": "Pendiente",
-        "Imagen": ruta_imagen
-    }
-
-    df = pd.concat(
-        [df, pd.DataFrame([nuevo_reporte])],
-        ignore_index=True
-    )
-
-    df.to_csv(RUTA_CSV, index=False)
-
-    st.success("Reporte guardado correctamente")
-
-    st.rerun()
-
-# =====================================================
-# TABLA DE REPORTES
-# =====================================================
-
-st.subheader("Tabla de reportes")
-
-if df.empty:
-
-    st.info("No existen reportes registrados.")
-
-else:
-
-    # =================================================
-    # FILTROS
-    # =================================================
-
-    col_f1, col_f2, col_f3 = st.columns(3)
-
-    with col_f1:
-
-        filtro_area = st.selectbox(
-            "Filtrar por área",
-            ["Todas"] + list(df["Area"].unique())
-        )
-
-    with col_f2:
-
-        filtro_prioridad = st.selectbox(
-            "Filtrar por prioridad",
-            ["Todas"] + list(df["Prioridad"].unique())
-        )
-
-    with col_f3:
-
-        filtro_estado = st.selectbox(
-            "Filtrar por estado",
-            ["Todos"] + list(df["Estado"].unique())
-        )
-
-    # =================================================
-    # APLICAR FILTROS
-    # =================================================
-
-    df_filtrado = df.copy()
-
-    if filtro_area != "Todas":
-
-        df_filtrado = df_filtrado[
-            df_filtrado["Area"] == filtro_area
-        ]
-
-    if filtro_prioridad != "Todas":
-
-        df_filtrado = df_filtrado[
-            df_filtrado["Prioridad"] == filtro_prioridad
-        ]
-
-    if filtro_estado != "Todos":
-
-        df_filtrado = df_filtrado[
-            df_filtrado["Estado"] == filtro_estado
-        ]
-
-    # =================================================
-    # TABLA
-    # =================================================
-
-    tabla = df_filtrado.copy()
-
-    tabla["Evidencia"] = tabla["ImagenApertura"].apply(
-        lambda x:
-        "Disponible"
-        if str(x).strip() != ""
-        else "Sin evidencia"
+        .head(10)
     )
 
     st.dataframe(
@@ -454,134 +284,39 @@ else:
         hide_index=True
     )
 
-    st.divider()
+else:
 
-    # =================================================
-    # CONSULTAR REPORTE
-    # =================================================
-
-    st.subheader("Consultar reporte")
-
-    lista_reportes = list(df_filtrado["ID"])
-
-    reporte_seleccionado = st.selectbox(
-        "Seleccionar número de reporte",
-        lista_reportes
+    st.info(
+        "No existen reportes registrados."
     )
-
-    reporte = df_filtrado[
-        df_filtrado["ID"] == reporte_seleccionado
-    ].iloc[0]
-
-    col_info, col_imagen = st.columns([2, 1.5])
-
-    # =================================================
-    # INFORMACION
-    # =================================================
-
-    with col_info:
-
-        st.write(
-            f"Folio: {reporte['Folio']}"
-        )
-
-        st.write(
-            f"Fecha: {reporte['FechaCreacion']}"
-        )
-
-        st.write(
-            f"Edificio: {reporte['Edificio']}"
-        )
-
-        st.write(
-            f"Área: {reporte['Area']}"
-        )
-
-        st.write(
-            f"Categoría: {reporte['Categoria']}"
-        )
-
-        st.write(
-            f"Activo: {reporte['Activo']}"
-        )
-
-        st.write(
-            f"Prioridad: {reporte['Prioridad']}"
-        )
-
-        st.write(
-            f"Estado: {reporte['Estado']}"
-        )
-
-        st.write(
-            f"Descripción: {reporte['Descripcion']}"
-        )
-
-        estados = [
-            "Pendiente",
-            "En proceso",
-            "Resuelto"
-        ]
-
-        nuevo_estado = st.selectbox(
-            "Estado del reporte",
-            estados,
-            index=estados.index(reporte["Estado"])
-        )
-
-        if st.button("Actualizar estado"):
-
-            df.loc[
-                df["ID"] == reporte["ID"],
-                "Estado"
-            ] = nuevo_estado
-
-            df.to_csv(RUTA_CSV, index=False)
-
-            st.success("Estado actualizado")
-
-            st.rerun()
-
-    # =================================================
-    # IMAGEN
-    # =================================================
-
-    with col_imagen:
-
-        st.subheader("Evidencia")
-
-        if (
-            pd.notna(reporte["ImagenApertura"])
-            and reporte["ImagenApertura"] != ""
-            and os.path.exists(reporte["ImagenApertura"])
-        ):
-
-            st.image(
-                reporte["ImagenApertura"],
-                use_container_width=True
-            )
-
-        else:
-
-            st.warning(
-                "No hay evidencia disponible"
-            )
-
-# =====================================================
-# DESCARGAR CSV
-# =====================================================
 
 st.divider()
 
-with open(RUTA_CSV, "rb") as archivo:
+# =====================================================
+# INFORMACIÓN DEL SISTEMA
+# =====================================================
 
-    st.download_button(
-        label="Descargar reportes CSV",
-        data=archivo,
-        file_name="reportes.csv",
-        mime="text/csv"
-    )
+st.subheader(
+    "Acerca del sistema"
+)
 
-from utils.data_guard import asegurar_esquema
+st.write(
+    """
+ATLAS fue desarrollado como una plataforma para la gestión
+de incidencias de mantenimiento dentro de la Universidad
+Tecnológica de Guaymas.
 
-df = asegurar_esquema(df)
+Su objetivo es facilitar el reporte de fallas por parte de
+alumnos, docentes y personal administrativo, permitiendo
+adjuntar evidencias y dar seguimiento al proceso de atención
+hasta el cierre del ticket.
+"""
+)
+
+# =====================================================
+# PIE DE PÁGINA
+# =====================================================
+
+st.caption(
+    "ATLAS • Sistema Institucional de Gestión de Mantenimiento"
+)

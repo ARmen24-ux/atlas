@@ -225,6 +225,18 @@ if enviar:
             archivo.write(
                 imagen.getbuffer()
             )
+        
+        if os.path.exists(ruta_img):
+
+            st.success(
+                "Imagen guardada correctamente"
+            )
+
+        else:
+
+            st.error(
+                "La imagen no se guardó"
+            )
 
     # =================================================
     # ID SEGURO

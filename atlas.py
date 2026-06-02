@@ -10,7 +10,6 @@ from utils.data_guard import asegurar_esquema
 
 st.set_page_config(
     page_title="ATLAS",
-    page_icon="🏫",
     layout="wide"
 )
 
@@ -204,19 +203,19 @@ with col_b:
 
     st.markdown(
         """
-✅ Evidencias fotográficas
+Evidencias fotográficas
 
-✅ Historial completo
+Historial completo
 
-✅ Seguimiento en tiempo real
+Seguimiento en tiempo real
 
-✅ Indicadores operativos
+Indicadores operativos
 
-✅ Control de mantenimiento
+Control de mantenimiento
 
-✅ Trazabilidad de tickets
+Trazabilidad de reportes
 
-✅ Centralización de incidencias
+Centralización de incidencias
 """
     )
 
@@ -309,7 +308,7 @@ Tecnológica de Guaymas.
 Su objetivo es facilitar el reporte de fallas por parte de
 alumnos, docentes y personal administrativo, permitiendo
 adjuntar evidencias y dar seguimiento al proceso de atención
-hasta el cierre del ticket.
+hasta el cierre de cada reporte.
 """
 )
 

@@ -394,10 +394,6 @@ else:
         opciones_validas
     )
 
-    # 🔥 MEJORA CLAVE: detectar si realmente hay cambio
-    if nuevo_estado == estado_actual:
-        st.warning("No has cambiado el estado del ticket.")
-        st.stop()
 
 # =====================================================
 # RESPONSABLE
@@ -414,10 +410,7 @@ responsable = st.text_input(
 
 imagen_cierre = None
 
-if estado_actual in [
-    "Resuelto",
-    "Verificado"
-]:
+if nuevo_estado == "Resuelto":
 
     st.write(
         "### 📷 Evidencia de cierre"
@@ -433,6 +426,14 @@ if estado_actual in [
 # ACTUALIZACIÓN
 # =====================================================
 
+if nuevo_estado == "Resuelto" and imagen_cierre is None:
+
+    st.error(
+        "Debes adjuntar evidencia de cierre."
+    )
+
+    st.stop()
+    
 if st.button("Guardar cambios"):
 
     ahora = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -464,51 +465,21 @@ if st.button("Guardar cambios"):
     # FECHAS AUTOMÁTICAS
     # ==========================================
 
-    if nuevo_estado != estado_anterior:
+    if nuevo_estado == "Asignado":
 
-        fecha_actual = str(
-            df.loc[
-                idx,
-                "FechaAsignacion"
-            ].values[0]
-        )
-
-        if fecha_actual.strip() == "":
-            df.loc[
-                idx,
-                "FechaAsignacion"
-            ] = ahora
+        if str(df.loc[idx, "FechaAsignacion"]).strip() == "":
+            df.loc[idx, "FechaAsignacion"] = ahora
 
     elif nuevo_estado == "Resuelto":
 
-        fecha_actual = str(
-            df.loc[
-                idx,
-                "FechaResolucion"
-            ].values[0]
-        )
-
-        if fecha_actual.strip() == "":
-            df.loc[
-                idx,
-                "FechaResolucion"
-            ] = ahora
+        if str(df.loc[idx, "FechaResolucion"]).strip() == "":
+            df.loc[idx, "FechaResolucion"] = ahora
 
     elif nuevo_estado == "Cerrado":
 
-        fecha_actual = str(
-            df.loc[
-                idx,
-                "FechaCierre"
-            ].values[0]
-        )
+        if str(df.loc[idx, "FechaCierre"]).strip() == "":
+            df.loc[idx, "FechaCierre"] = ahora
 
-        if fecha_actual.strip() == "":
-            df.loc[
-                idx,
-                "FechaCierre"
-            ] = ahora
-    
     # ====== IMAGEN CIERRE ======
     if imagen_cierre is not None:
 
@@ -556,14 +527,21 @@ st.divider()
 # =====================================================
 # CALCULAR SLA PARA TABLA
 # =====================================================
-
-
-st.subheader("📋 Todos los tickets")
-
 df_filtrado = df_filtrado.copy()
 
 df_filtrado["SLA"] = [
-    calcular_sla(f["FechaCreacion"], f["Prioridad"])[0]
+    calcular_sla(
+        f["FechaCreacion"],
+        f["Prioridad"]
+    )[0]
+    for _, f in df_filtrado.iterrows()
+]
+
+df_filtrado["HorasRestantes"] = [
+    calcular_sla(
+        f["FechaCreacion"],
+        f["Prioridad"]
+    )[1]
     for _, f in df_filtrado.iterrows()
 ]
 

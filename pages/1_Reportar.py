@@ -179,11 +179,9 @@ with st.form("formulario_reporte"):
             "heif"
         ]
     )
-if imagen is not None:
 
-    st.write("Nombre:", imagen.name)
-    st.write("Tipo:", imagen.type)
-    st.write("Tamaño:", imagen.size)
+    enviar = st.form_submit_button("Enviar reporte")
+
 # =====================================================
 # GUARDAR REPORTE
 # =====================================================

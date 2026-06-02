@@ -485,12 +485,40 @@ else:
     with col_info:
 
         st.write(
+            f"Folio: {reporte['Folio']}"
+        )
+
+        st.write(
             f"Fecha: {reporte['FechaCreacion']}"
         )
-        st.write(f"Área: {reporte['Area']}")
-        st.write(f"Problema: {reporte['Problema']}")
-        st.write(f"Descripción: {reporte['Descripcion']}")
-        st.write(f"Prioridad: {reporte['Prioridad']}")
+
+        st.write(
+            f"Edificio: {reporte['Edificio']}"
+        )
+
+        st.write(
+            f"Área: {reporte['Area']}"
+        )
+
+        st.write(
+            f"Categoría: {reporte['Categoria']}"
+        )
+
+        st.write(
+            f"Activo: {reporte['Activo']}"
+        )
+
+        st.write(
+            f"Prioridad: {reporte['Prioridad']}"
+        )
+
+        st.write(
+            f"Estado: {reporte['Estado']}"
+        )
+
+        st.write(
+            f"Descripción: {reporte['Descripcion']}"
+        )
 
         estados = [
             "Pendiente",
@@ -526,19 +554,21 @@ else:
         st.subheader("Evidencia")
 
         if (
-            pd.notna(reporte["Imagen"])
-            and reporte["Imagen"] != ""
-            and os.path.exists(reporte["Imagen"])
+            pd.notna(reporte["ImagenApertura"])
+            and reporte["ImagenApertura"] != ""
+            and os.path.exists(reporte["ImagenApertura"])
         ):
 
             st.image(
-                reporte["Imagen"],
+                reporte["ImagenApertura"],
                 use_container_width=True
             )
 
         else:
 
-            st.warning("No hay evidencia disponible")
+            st.warning(
+                "No hay evidencia disponible"
+            )
 
 # =====================================================
 # DESCARGAR CSV

@@ -576,7 +576,7 @@ columnas_tabla = [
     "Prioridad",
     "Estado",
     "SLA",
-    "Responsable"
+    "Responsable",
     "HorasRestantes"
 ]
 

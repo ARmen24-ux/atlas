@@ -169,15 +169,8 @@ with st.form("formulario_reporte"):
         ]
     )
 
-    imagen = st.file_uploader(
-        "Evidencia fotográfica",
-        type=[
-            "png",
-            "jpg",
-            "jpeg",
-            "heic",
-            "heif"
-        ]
+    imagen = st.camera_input(
+        "Tomar fotografía"
     )
 
     enviar = st.form_submit_button("Enviar reporte")

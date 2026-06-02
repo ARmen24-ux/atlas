@@ -68,7 +68,11 @@ def asegurar_esquema(df: pd.DataFrame) -> pd.DataFrame:
     # Imagen -> ImagenApertura
     if "Imagen" in df.columns:
 
-        df["ImagenApertura"] = df["Imagen"]
+        df["ImagenApertura"] = (
+            df["ImagenApertura"]
+            .replace("", pd.NA)
+            .fillna(df["Imagen"])
+        )
 
         df.drop(
             columns=["Imagen"],

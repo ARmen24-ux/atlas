@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
+from utils.data_guard import asegurar_esquema
 
 # =====================================================
 # CONFIGURACION DE PAGINA
@@ -225,22 +226,17 @@ if not os.path.exists(RUTA_CSV):
 # LEER CSV
 # =====================================================
 
-df = pd.read_csv(RUTA_CSV)
+df = pd.read_csv(
+    RUTA_CSV,
+    keep_default_na=False
+)
 
-# =====================================================
-# CORREGIR COLUMNAS FALTANTES
-# =====================================================
+df = asegurar_esquema(df)
 
-if "ID" not in df.columns:
-    df.insert(0, "ID", range(1, len(df) + 1))
-
-if "Estado" not in df.columns:
-    df["Estado"] = "Pendiente"
-
-if "Imagen" not in df.columns:
-    df["Imagen"] = ""
-
-df.to_csv(RUTA_CSV, index=False)
+df.to_csv(
+    RUTA_CSV,
+    index=False
+)
 
 # =====================================================
 # HEADER
@@ -445,10 +441,11 @@ else:
 
     tabla = df_filtrado.copy()
 
-    tabla["Imagen"] = tabla["Imagen"].apply(
-        lambda x: "Disponible"
-        if pd.notna(x) and x != ""
-        else "Sin imagen"
+    tabla["Evidencia"] = tabla["ImagenApertura"].apply(
+        lambda x:
+        "Disponible"
+        if str(x).strip() != ""
+        else "Sin evidencia"
     )
 
     st.dataframe(

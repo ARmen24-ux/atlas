@@ -329,39 +329,17 @@ st.info(ticket["Descripcion"])
 # =====================================================
 # EVIDENCIA
 # =====================================================
-st.write("Ruta imagen:")
-st.write(ticket["ImagenApertura"])
-
-st.write("Existe:")
-st.write(
-    os.path.exists(
-        ticket["ImagenApertura"]
-    )
-)
 if str(ticket["ImagenApertura"]).strip() != "":
 
-    ruta = ticket["ImagenApertura"]
+    if os.path.exists(ticket["ImagenApertura"]):
 
-    st.write("Ruta:")
-    st.write(ruta)
+        st.write("### Evidencia inicial")
 
-    if os.path.exists(ruta):
-
-        st.success("Archivo encontrado")
-
-        try:
-
-            st.image(
-                ruta,
-                caption="Evidencia inicial",
-                use_container_width=True
-            )
-
-            st.success("Imagen cargada")
-
-        except Exception as e:
-
-            st.error(f"Error al mostrar imagen: {e}")
+        st.image(
+            ticket["ImagenApertura"],
+            caption="Evidencia inicial",
+            use_container_width=True
+        )
 
 # =====================================================
 # FOTO FINAL

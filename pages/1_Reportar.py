@@ -171,13 +171,19 @@ with st.form("formulario_reporte"):
 
     imagen = st.file_uploader(
         "Evidencia fotográfica",
-        type=["png", "jpg", "jpeg"]
+        type=[
+            "png",
+            "jpg",
+            "jpeg",
+            "heic",
+            "heif"
+        ]
     )
+if imagen is not None:
 
-    enviar = st.form_submit_button(
-        "Enviar reporte"
-    )
-
+    st.write("Nombre:", imagen.name)
+    st.write("Tipo:", imagen.type)
+    st.write("Tamaño:", imagen.size)
 # =====================================================
 # GUARDAR REPORTE
 # =====================================================

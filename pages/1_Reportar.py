@@ -173,6 +173,9 @@ with st.form("formulario_reporte"):
         "Tomar fotografía"
     )
 
+    if imagen is not None:
+        st.success("Imagen capturada")
+
     enviar = st.form_submit_button("Enviar reporte")
 
 # =====================================================

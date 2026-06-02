@@ -327,20 +327,46 @@ st.write("### Descripción")
 st.info(ticket["Descripcion"])
 
 # =====================================================
-# EVIDENCIA
+# EVIDENCIA INICIAL
 # =====================================================
-if str(ticket["ImagenApertura"]).strip() != "":
 
-    if os.path.exists(ticket["ImagenApertura"]):
+ruta_imagen = str(
+    ticket.get("ImagenApertura", "")
+).strip()
 
-        st.write("### Evidencia inicial")
+if ruta_imagen not in ["", "nan", "None"]:
 
-        st.image(
-            ticket["ImagenApertura"],
-            caption="Evidencia inicial",
-            use_container_width=True
+    st.write("### Evidencia inicial")
+
+    if os.path.exists(ruta_imagen):
+
+        try:
+
+            st.image(
+                ruta_imagen,
+                caption="Evidencia inicial",
+                use_container_width=True
+            )
+
+        except Exception as e:
+
+            st.error(
+                f"No se pudo abrir la imagen: {e}"
+            )
+
+    else:
+
+        st.warning(
+            "La imagen fue registrada pero el archivo no fue encontrado."
         )
 
+        st.code(ruta_imagen)
+st.write("Ruta:", ruta_imagen)
+
+st.write(
+    "Existe:",
+    os.path.exists(ruta_imagen)
+)
 # =====================================================
 # FOTO FINAL
 # =====================================================
@@ -425,16 +451,19 @@ if nuevo_estado == "Resuelto":
 # =====================================================
 # ACTUALIZACIÓN
 # =====================================================
+   
+if st.button("Guardar cambios"):
 
-if nuevo_estado == "Resuelto" and imagen_cierre is None:
-
-    st.error(
-        "Debes adjuntar evidencia de cierre."
+    if (
+        nuevo_estado == "Resuelto"
+        and imagen_cierre is None
+    ):
+        
+        st.error(
+            "Debes adjuntar evidencia de cierre."
     )
 
     st.stop()
-    
-if st.button("Guardar cambios"):
 
     ahora = datetime.now().strftime("%Y-%m-%d %H:%M")
     estado_anterior = ticket["Estado"]

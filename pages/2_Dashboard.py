@@ -329,7 +329,15 @@ st.info(ticket["Descripcion"])
 # =====================================================
 # EVIDENCIA
 # =====================================================
+st.write("Ruta imagen:")
+st.write(ticket["ImagenApertura"])
 
+st.write("Existe:")
+st.write(
+    os.path.exists(
+        ticket["ImagenApertura"]
+    )
+)
 if str(ticket["ImagenApertura"]).strip() != "":
 
     if os.path.exists(ticket["ImagenApertura"]):

@@ -484,7 +484,9 @@ else:
 
     with col_info:
 
-        st.write(f"Fecha: {reporte['Fecha']}")
+        st.write(
+            f"Fecha: {reporte['FechaCreacion']}"
+        )
         st.write(f"Área: {reporte['Area']}")
         st.write(f"Problema: {reporte['Problema']}")
         st.write(f"Descripción: {reporte['Descripcion']}")

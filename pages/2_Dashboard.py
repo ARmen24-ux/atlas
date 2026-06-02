@@ -340,14 +340,28 @@ st.write(
 )
 if str(ticket["ImagenApertura"]).strip() != "":
 
-    if os.path.exists(ticket["ImagenApertura"]):
+    ruta = ticket["ImagenApertura"]
 
-        st.write("### Evidencia inicial")
+    st.write("Ruta:")
+    st.write(ruta)
 
-        st.image(
-            ticket["ImagenApertura"],
-            width=500
-        )
+    if os.path.exists(ruta):
+
+        st.success("Archivo encontrado")
+
+        try:
+
+            st.image(
+                ruta,
+                caption="Evidencia inicial",
+                use_container_width=True
+            )
+
+            st.success("Imagen cargada")
+
+        except Exception as e:
+
+            st.error(f"Error al mostrar imagen: {e}")
 
 # =====================================================
 # FOTO FINAL

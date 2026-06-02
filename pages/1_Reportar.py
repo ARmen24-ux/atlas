@@ -314,7 +314,9 @@ if enviar:
     # =================================================
     # GUARDAR
     # =================================================
-
+    st.write("Ruta imagen guardada:")
+    st.write(ruta_img)
+    
     df = pd.concat(
         [
             df,

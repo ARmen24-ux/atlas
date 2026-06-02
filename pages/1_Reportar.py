@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import os
+import re
 
 from utils.data_guard import asegurar_esquema
 from utils.historial import registrar_movimiento
@@ -189,6 +190,12 @@ if enviar:
 
     if correo.strip() == "":
         st.error("Ingresa un correo")
+        st.stop()
+    
+    patron_correo = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+
+    if not re.match(patron_correo, correo):
+        st.error("Ingresa un correo válido")
         st.stop()
 
     if descripcion.strip() == "":

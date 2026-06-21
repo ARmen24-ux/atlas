@@ -462,8 +462,7 @@ if st.button("Guardar cambios"):
         st.error(
             "Debes adjuntar evidencia de cierre."
     )
-
-    st.stop()
+        st.stop()
 
     ahora = datetime.now().strftime("%Y-%m-%d %H:%M")
     estado_anterior = ticket["Estado"]
@@ -527,6 +526,11 @@ if st.button("Guardar cambios"):
 
         df.loc[idx, "ImagenCierre"] = ruta_img
         
+    df.to_csv(
+        RUTA_CSV,
+        index=False
+    )
+    
     registrar_movimiento(
         folio=ticket_folio,
         usuario=st.session_state.get(
@@ -535,11 +539,6 @@ if st.button("Guardar cambios"):
         ),
         accion="Cambio de estado",
         detalle=f"{estado_anterior} → {nuevo_estado}"
-    )
-
-    df.to_csv(
-        RUTA_CSV,
-        index=False
     )
 
     st.success(

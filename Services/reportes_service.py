@@ -119,7 +119,7 @@ def crear_reporte(datos):
 
             "Estado": "Pendiente",
 
-            "Responsable": "",
+            "Responsable": "Sin asignar",
 
             "ComentarioCierre": "",
 
@@ -152,6 +152,8 @@ def crear_reporte(datos):
             accion="Creación",
             detalle="Reporte creado por usuario"
         )
+
+        print("Historial registrado:", folio)
 
         # ==========================
         # Respuesta

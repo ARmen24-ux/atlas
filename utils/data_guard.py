@@ -1,34 +1,70 @@
 import pandas as pd
 
+
 # =====================================================
-# ESQUEMA OFICIAL DE ATLAS
+# ESQUEMA OFICIAL DE REPORTES ATLAS
 # =====================================================
 
 COLUMNAS_REQUERIDAS = {
+
     "ID": "",
+
     "Folio": "",
 
+
+    # Fechas
+
     "FechaCreacion": "",
+
     "FechaAsignacion": "",
+
     "FechaResolucion": "",
+
     "FechaCierre": "",
+
     "FechaActualizacion": "",
 
+
+
+    # Usuario
+
     "TipoUsuario": "",
+
     "Nombre": "",
+
     "Correo": "",
 
+
+
+    # Ubicación
+
     "Edificio": "",
+
     "Area": "",
+
     "UbicacionDetalle": "",
 
+
+
+    # Clasificación
+
     "Activo": "",
+
     "Categoria": "",
 
     "Impacto": "",
+
     "Prioridad": "",
 
+
+
+    # Descripción
+
     "Descripcion": "",
+
+
+
+    # Seguimiento
 
     "Estado": "Pendiente",
 
@@ -36,43 +72,61 @@ COLUMNAS_REQUERIDAS = {
 
     "ComentarioCierre": "",
 
+
+
+    # Evidencias
+
     "ImagenApertura": "",
+
     "ImagenCierre": ""
+
 }
 
+
+
 # =====================================================
-# ASEGURAR ESQUEMA
+# ASEGURAR ESQUEMA DE REPORTES
 # =====================================================
 
-def asegurar_esquema(df: pd.DataFrame) -> pd.DataFrame:
+def asegurar_esquema(df: pd.DataFrame):
+
     """
-    Garantiza que el DataFrame tenga todas las columnas
-    requeridas por ATLAS.
-
-    Si una columna no existe se crea automáticamente.
+    Garantiza que reportes.csv
+    tenga la estructura oficial ATLAS.
     """
 
-    # Limpiar espacios en nombres de columnas
-    df.columns = df.columns.str.strip()
 
-    # Crear columnas faltantes
-    for columna, valor_default in COLUMNAS_REQUERIDAS.items():
+    if df is None:
 
-        if columna not in df.columns:
-            df[columna] = valor_default
+        df = pd.DataFrame()
+
+
+
+    # Limpiar nombres
+
+    df.columns = (
+        df.columns
+        .str.strip()
+    )
+
+
 
     # =================================================
-    # COMPATIBILIDAD CON VERSIONES ANTERIORES
+    # COMPATIBILIDAD VERSIONES ANTERIORES
     # =================================================
 
-    # Imagen -> ImagenApertura
+
+    # Imagen antigua
+
     if "Imagen" in df.columns:
 
-        df["ImagenApertura"] = (
-            df["ImagenApertura"]
-            .replace("", pd.NA)
-            .fillna(df["Imagen"])
-        )
+
+        if "ImagenApertura" not in df.columns:
+
+            df["ImagenApertura"] = (
+                df["Imagen"]
+            )
+
 
         df.drop(
             columns=["Imagen"],
@@ -80,10 +134,19 @@ def asegurar_esquema(df: pd.DataFrame) -> pd.DataFrame:
             errors="ignore"
         )
 
-    # Fecha -> FechaCreacion
+
+
+    # Fecha antigua
+
     if "Fecha" in df.columns:
 
-        df["FechaCreacion"] = df["Fecha"]
+
+        if "FechaCreacion" not in df.columns:
+
+            df["FechaCreacion"] = (
+                df["Fecha"]
+            )
+
 
         df.drop(
             columns=["Fecha"],
@@ -91,12 +154,24 @@ def asegurar_esquema(df: pd.DataFrame) -> pd.DataFrame:
             errors="ignore"
         )
 
-    # =================================================
-    # ORDENAR COLUMNAS
-    # =================================================
 
-    columnas_finales = list(COLUMNAS_REQUERIDAS.keys())
 
-    df = df.reindex(columns=columnas_finales)
+    # Crear columnas faltantes
+
+    for columna, valor in COLUMNAS_REQUERIDAS.items():
+
+        if columna not in df.columns:
+
+            df[columna] = valor
+
+
+
+    # Orden oficial
+
+    df = df[
+        list(COLUMNAS_REQUERIDAS.keys())
+    ]
+
+
 
     return df

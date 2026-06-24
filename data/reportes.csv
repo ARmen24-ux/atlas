@@ -1,2 +1,2 @@
-ID,Folio,FechaCreacion,FechaAsignacion,FechaResolucion,FechaCierre,FechaActualizacion,TipoUsuario,Nombre,Correo,Edificio,Area,UbicacionDetalle,Activo,Categoria,Impacto,Prioridad,Descripcion,Estado,Responsable,ComentarioCierre,ImagenApertura,ImagenCierre,Imagen
-1,,02/06/2026 00:16,,,,,,,,,Auditorio,,,,,Baja,hay basura en todos lados,Pendiente,,,,,
+id,FechaCreacion,FechaAsignacion,FechaResolucion,FechaCierre,FechaActualizacion,TipoUsuario,Nombre,Correo,Edificio,Area,UbicacionDetalle,Activo,Categoria,Impacto,Prioridad,Descripcion,Estado,Responsable,ComentarioCierre,ImagenApertura,ImagenCierre
+

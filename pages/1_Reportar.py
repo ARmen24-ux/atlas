@@ -3,7 +3,10 @@ import re
 
 from database.catalogos_db import (
     cargar_ubicaciones,
-    cargar_activos
+    cargar_activos,
+    cargar_categorias,
+    cargar_prioridades,
+    cargar_impactos
 )
 
 from Services.reportes_service import (
@@ -30,6 +33,12 @@ try:
     ubi = cargar_ubicaciones()
 
     act = cargar_activos()
+
+    cat = cargar_categorias()
+
+    prio = cargar_prioridades()
+
+    imp = cargar_impactos()
 
 except Exception as e:
 
@@ -115,28 +124,17 @@ with st.form("formulario_reporte"):
 
     categoria = st.selectbox(
         "Categoría",
-        [
-            "Electricidad",
-            "Plomería",
-            "Infraestructura",
-            "Mobiliario",
-            "Cómputo",
-            "Red",
-            "Seguridad",
-            "Limpieza",
-            "Otro"
-        ]
+        cat["Categoria"]
+        .dropna()
+        .tolist()
     )
 
     prioridad = st.selectbox(
         "Prioridad",
-        [
-            "Baja",
-            "Media",
-            "Alta",
-            "Crítica"
-        ]
-    )
+        prio["Prioridad"]
+        .dropna()
+        .tolist()
+)
 
     descripcion = st.text_area(
         "Descripción del problema"
@@ -144,11 +142,9 @@ with st.form("formulario_reporte"):
 
     impacto = st.selectbox(
         "Impacto",
-        [
-            "No afecta actividades",
-            "Afecta parcialmente",
-            "Impide actividades"
-        ]
+        imp["Impacto"]
+        .dropna()
+        .tolist()
     )
 
     imagen = st.camera_input(

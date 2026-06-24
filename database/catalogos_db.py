@@ -1,4 +1,6 @@
 import pandas as pd
+import os
+
 
 RUTA_UBICACIONES = "data/catalogo_ubicaciones.csv"
 RUTA_ACTIVOS = "data/catalogo_activos.csv"
@@ -7,56 +9,33 @@ RUTA_PRIORIDADES = "data/catalogo_prioridades.csv"
 RUTA_IMPACTOS = "data/catalogo_impactos.csv"
 
 
-def cargar_ubicaciones():
+def cargar_csv(ruta):
 
-    df = pd.read_csv(
-        RUTA_UBICACIONES
-    )
+    if not os.path.exists(ruta):
+        return pd.DataFrame()
+
+    df = pd.read_csv(ruta)
 
     df.columns = df.columns.str.strip()
 
     return df
+
+
+def cargar_ubicaciones():
+    return cargar_csv(RUTA_UBICACIONES)
 
 
 def cargar_activos():
-
-    df = pd.read_csv(
-        RUTA_ACTIVOS
-    )
-
-    df.columns = df.columns.str.strip()
-
-    return df
+    return cargar_csv(RUTA_ACTIVOS)
 
 
 def cargar_categorias():
-
-    df = pd.read_csv(
-        RUTA_CATEGORIAS
-    )
-
-    df.columns = df.columns.str.strip()
-
-    return df
+    return cargar_csv(RUTA_CATEGORIAS)
 
 
 def cargar_prioridades():
-
-    df = pd.read_csv(
-        RUTA_PRIORIDADES
-    )
-
-    df.columns = df.columns.str.strip()
-
-    return df
+    return cargar_csv(RUTA_PRIORIDADES)
 
 
 def cargar_impactos():
-
-    df = pd.read_csv(
-        RUTA_IMPACTOS
-    )
-
-    df.columns = df.columns.str.strip()
-
-    return df
+    return cargar_csv(RUTA_IMPACTOS)

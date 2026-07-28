@@ -93,12 +93,6 @@ def crear_reporte(datos):
 
             "FechaActualizacion": fecha_actual,
 
-            "TipoUsuario": datos["tipo"],
-
-            "Nombre": datos["nombre"],
-
-            "Correo": datos["correo"],
-
             "Edificio": datos["edificio"],
 
             "Area": datos["area"],
@@ -148,7 +142,7 @@ def crear_reporte(datos):
 
         registrar_movimiento(
             folio=folio,
-            usuario=datos["nombre"],
+            usuario="Sistema",
             accion="Creación",
             detalle="Reporte creado por usuario"
         )

@@ -1,5 +1,4 @@
 import streamlit as st
-import re
 
 from database.catalogos_db import (
     cargar_ubicaciones,
@@ -91,29 +90,6 @@ ubicacion_detalle = st.text_input(
 with st.form("formulario_reporte"):
 
     st.subheader(
-        "👤 Datos del usuario"
-    )
-
-    tipo = st.selectbox(
-        "Tipo de usuario",
-        [
-            "Alumno",
-            "Docente",
-            "Administrativo"
-        ]
-    )
-
-    nombre = st.text_input(
-        "Nombre"
-    )
-
-    correo = st.text_input(
-        "Correo"
-    )
-
-    st.divider()
-
-    st.subheader(
         "🛠 Información de la incidencia"
     )
 
@@ -171,37 +147,6 @@ if enviar:
     # VALIDACIONES
     # ==========================================
 
-    if nombre.strip() == "":
-
-        st.error(
-            "Ingresa tu nombre"
-        )
-
-        st.stop()
-
-    if correo.strip() == "":
-
-        st.error(
-            "Ingresa un correo"
-        )
-
-        st.stop()
-
-    patron_correo = (
-        r"^[\w\.-]+@[\w\.-]+\.\w+$"
-    )
-
-    if not re.match(
-        patron_correo,
-        correo
-    ):
-
-        st.error(
-            "Ingresa un correo válido"
-        )
-
-        st.stop()
-
     if descripcion.strip() == "":
 
         st.error(
@@ -215,12 +160,6 @@ if enviar:
     # ==========================================
 
     datos = {
-
-        "tipo": tipo,
-
-        "nombre": nombre,
-
-        "correo": correo,
 
         "edificio": edificio,
 

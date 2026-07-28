@@ -30,18 +30,6 @@ st.set_page_config(
 st.title("ATLAS - Panel de Mantenimiento")
 
 # =====================================================
-# PROTECCIÓN DE ACCESO
-# =====================================================
-
-if "rol" not in st.session_state:
-    st.warning("Acceso restringido")
-    st.stop()
-
-if st.session_state.rol not in ["admin", "mantenimiento"]:
-    st.error("Sin permisos")
-    st.stop()
-
-# =====================================================
 # RUTAS
 # =====================================================
 
@@ -533,10 +521,7 @@ if st.button("Guardar cambios"):
     
     registrar_movimiento(
         folio=ticket_folio,
-        usuario=st.session_state.get(
-            "usuario",
-            "Sistema"
-        ),
+        usuario="Sistema",
         accion="Cambio de estado",
         detalle=f"{estado_anterior} → {nuevo_estado}"
     )
@@ -661,19 +646,13 @@ if st.button(
 
         agregar_comentario(
             folio=ticket_folio,
-            usuario=st.session_state.get(
-                "usuario",
-                "Sistema"
-            ),
+            usuario="Sistema",
             comentario=nuevo_comentario
         )
 
         registrar_movimiento(
             folio=ticket_folio,
-            usuario=st.session_state.get(
-                "usuario",
-                "Sistema"
-            ),
+            usuario="Sistema",
             accion="Comentario",
             detalle=nuevo_comentario
         )

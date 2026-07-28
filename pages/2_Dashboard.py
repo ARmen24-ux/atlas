@@ -92,12 +92,10 @@ df["ID"] = df["ID"].astype(str)
 # =====================================================
 
 TRANSICIONES = {
-    "Pendiente": ["Validado", "Rechazado"],
-    "Validado": ["Asignado", "Rechazado"],
+    "Pendiente": ["Asignado", "Rechazado"],
     "Asignado": ["En proceso"],
     "En proceso": ["Resuelto"],
-    "Resuelto": ["Verificado"],
-    "Verificado": ["Cerrado"]
+    "Resuelto": ["Cerrado"]
 }
 
 # =====================================================

@@ -115,120 +115,6 @@ df_filtrado = aplicar_sla(
 )
 
 # =====================================================
-# KPIs
-# =====================================================
-
-st.subheader(" Indicadores")
-
-en_tiempo = len(
-    df_filtrado[
-        df_filtrado["SLA"] == "En tiempo"
-    ]
-)
-
-proximos = len(
-    df_filtrado[
-        df_filtrado["SLA"] == "Próximo a vencer"
-    ]
-)
-
-vencidos = len(
-    df_filtrado[
-        df_filtrado["SLA"] == "Vencido"
-    ]
-)
-
-cumplimiento = 0
-
-if len(df_filtrado) > 0:
-
-    cumplimiento = round(
-        (en_tiempo / len(df_filtrado)) * 100,
-        1
-    )
-
-col1, col2, col3, col4 = st.columns(4)
-
-col1.metric(
-    "🟢 En tiempo",
-    en_tiempo
-)
-
-col2.metric(
-    "🟡 Próximos",
-    proximos
-)
-
-col3.metric(
-    "🔴 Vencidos",
-    vencidos
-)
-
-col4.metric(
-    " SLA %",
-    f"{cumplimiento}%"
-)
-
-st.divider()
-
-# =====================================================
-# GRÁFICAS
-# =====================================================
-
-colA, colB = st.columns(2)
-
-with colA:
-
-    st.subheader(" Tickets por estado")
-
-    estado_counts = (
-        df_filtrado
-        .groupby("Estado")
-        .size()
-        .reset_index(name="Cantidad")
-    )
-
-    if not estado_counts.empty:
-
-        fig1 = px.bar(
-            estado_counts,
-            x="Estado",
-            y="Cantidad",
-            text="Cantidad"
-        )
-
-        st.plotly_chart(
-            fig1,
-            use_container_width=True
-        )
-
-with colB:
-
-    st.subheader(" Tickets por prioridad")
-
-    prioridad_counts = (
-        df_filtrado
-        .groupby("Prioridad")
-        .size()
-        .reset_index(name="Cantidad")
-    )
-
-    if not prioridad_counts.empty:
-
-        fig2 = px.pie(
-            prioridad_counts,
-            names="Prioridad",
-            values="Cantidad"
-        )
-
-        st.plotly_chart(
-            fig2,
-            use_container_width=True
-        )
-
-st.divider()
-
-# =====================================================
 # GESTIÓN DE TICKETS
 # =====================================================
 
@@ -254,15 +140,6 @@ if ticket_df.empty:
 ticket = ticket_df.iloc[0]
 
 # =====================================================
-# SLA
-# =====================================================
-
-estado_sla, horas_restantes = calcular_sla(
-    ticket["FechaCreacion"],
-    ticket["Prioridad"]
-)
-
-# =====================================================
 # INFORMACIÓN DEL TICKET
 # =====================================================
 
@@ -279,24 +156,6 @@ with col1:
     st.write(f"**Área:** {ticket['Area']}")
     st.write(f"**Activo:** {ticket['Activo']}")
 
-if estado_sla == "En tiempo":
-
-    st.success(
-        f"SLA: {estado_sla}"
-    )
-
-elif estado_sla == "Próximo a vencer":
-
-    st.warning(
-        f"SLA: {estado_sla}"
-    )
-
-else:
-
-    st.error(
-        f"SLA: {estado_sla}"
-    )
-    
 with col2:
 
     st.write(f"**Categoría:** {ticket['Categoria']}")
@@ -524,54 +383,6 @@ if st.button("Guardar cambios"):
     )
 
     st.rerun()
-# =====================================================
-# TABLA GENERAL
-# =====================================================
-
-st.divider()
-
-# =====================================================
-# CALCULAR SLA PARA TABLA
-# =====================================================
-df_filtrado = df_filtrado.copy()
-
-df_filtrado["SLA"] = [
-    calcular_sla(
-        f["FechaCreacion"],
-        f["Prioridad"]
-    )[0]
-    for _, f in df_filtrado.iterrows()
-]
-
-df_filtrado["HorasRestantes"] = [
-    calcular_sla(
-        f["FechaCreacion"],
-        f["Prioridad"]
-    )[1]
-    for _, f in df_filtrado.iterrows()
-]
-
-columnas_tabla = [
-    "Folio",
-    "FechaCreacion",
-    "Edificio",
-    "Area",
-    "Categoria",
-    "Prioridad",
-    "Estado",
-    "SLA",
-    "Responsable",
-    "HorasRestantes"
-]
-
-st.dataframe(
-    df_filtrado[columnas_tabla]
-    .sort_values(
-        by="FechaCreacion",
-        ascending=False
-    ),
-    use_container_width=True
-)
 
 # =====================================================
 # Bitácora técnica

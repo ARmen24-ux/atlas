@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 
-from utils.reportes_db import cargar_reportes
+from database.reportes_db import cargar_reportes
 
 
 # =====================================================

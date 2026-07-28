@@ -56,9 +56,6 @@ df = asegurar_esquema(df)
 
 columnas_texto = [
     "Folio",
-    "TipoUsuario",
-    "Nombre",
-    "Correo",
     "Edificio",
     "Area",
     "UbicacionDetalle",
@@ -304,8 +301,6 @@ else:
     
 with col2:
 
-    st.write(f"**Reportó:** {ticket['Nombre']}")
-    st.write(f"**Correo:** {ticket['Correo']}")
     st.write(f"**Categoría:** {ticket['Categoria']}")
     st.write(f"**Impacto:** {ticket['Impacto']}")
     st.write(f"**Responsable:** {ticket['Responsable']}")

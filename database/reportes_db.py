@@ -180,3 +180,302 @@ def eliminar_reporte(folio):
         raise Exception(
             f"Error al eliminar reporte: {e}"
         )
+
+# =====================================================
+# FILTRAR REPORTES
+# =====================================================
+
+def filtrar_reportes(
+    estado=None,
+    prioridad=None,
+    edificio=None,
+    categoria=None
+):
+    """
+    Devuelve un DataFrame filtrado.
+    """
+
+    try:
+
+        consulta = (
+            supabase
+            .table(TABLA)
+            .select("*")
+        )
+
+        if estado:
+
+            if isinstance(estado, list):
+
+                consulta = consulta.in_("Estado", estado)
+
+            else:
+
+                consulta = consulta.eq(
+                    "Estado",
+                    estado
+                )
+
+        if prioridad:
+
+            if isinstance(prioridad, list):
+
+                consulta = consulta.in_(
+                    "Prioridad",
+                    prioridad
+                )
+
+            else:
+
+                consulta = consulta.eq(
+                    "Prioridad",
+                    prioridad
+                )
+
+        if edificio:
+
+            consulta = consulta.eq(
+                "Edificio",
+                edificio
+            )
+
+        if categoria:
+
+            consulta = consulta.eq(
+                "Categoria",
+                categoria
+            )
+
+        respuesta = consulta.execute()
+
+        df = pd.DataFrame(
+            respuesta.data or []
+        )
+
+        if df.empty:
+
+            return pd.DataFrame()
+
+        columnas_fecha = [
+            "FechaCreacion",
+            "FechaAsignacion",
+            "FechaResolucion",
+            "FechaCierre",
+            "FechaActualizacion"
+        ]
+
+        for columna in columnas_fecha:
+
+            if columna in df.columns:
+
+                df[columna] = pd.to_datetime(
+                    df[columna],
+                    errors="coerce"
+                )
+
+        return df
+
+    except Exception as e:
+
+        raise Exception(
+            f"Error al filtrar reportes: {e}"
+        )
+
+
+# =====================================================
+# ESTADÍSTICAS GENERALES
+# =====================================================
+
+def estadisticas_generales():
+    """
+    Indicadores básicos.
+    """
+
+    df = cargar_reportes()
+
+    if df.empty:
+
+        return {
+
+            "total": 0,
+            "pendientes": 0,
+            "asignados": 0,
+            "en_proceso": 0,
+            "resueltos": 0,
+            "cerrados": 0
+
+        }
+
+    return {
+
+        "total": len(df),
+
+        "pendientes": len(
+            df[
+                df["Estado"] == "Pendiente"
+            ]
+        ),
+
+        "asignados": len(
+            df[
+                df["Estado"] == "Asignado"
+            ]
+        ),
+
+        "en_proceso": len(
+            df[
+                df["Estado"] == "En proceso"
+            ]
+        ),
+
+        "resueltos": len(
+            df[
+                df["Estado"] == "Resuelto"
+            ]
+        ),
+
+        "cerrados": len(
+            df[
+                df["Estado"] == "Cerrado"
+            ]
+        )
+
+    }
+
+
+# =====================================================
+# EXISTE FOLIO
+# =====================================================
+
+def existe_folio(
+    folio
+):
+    """
+    Verifica si existe un folio.
+    """
+
+    try:
+
+        respuesta = (
+
+            supabase
+
+            .table(TABLA)
+
+            .select(
+                "id"
+            )
+
+            .eq(
+                "Folio",
+                folio
+            )
+
+            .limit(1)
+
+            .execute()
+
+        )
+
+        return len(
+            respuesta.data
+        ) > 0
+
+    except:
+
+        return False
+
+
+# =====================================================
+# LISTAR FOLIOS
+# =====================================================
+
+def listar_folios():
+
+    """
+    Devuelve una lista de folios.
+    """
+
+    try:
+
+        respuesta = (
+
+            supabase
+
+            .table(TABLA)
+
+            .select(
+                "Folio"
+            )
+
+            .order(
+                "FechaCreacion",
+                desc=True
+            )
+
+            .execute()
+
+        )
+
+        return [
+
+            r["Folio"]
+
+            for r in respuesta.data
+
+        ]
+
+    except:
+
+        return []
+
+
+# =====================================================
+# TOTAL REPORTES
+# =====================================================
+
+def total_reportes():
+
+    return len(
+        cargar_reportes()
+    )
+
+
+# =====================================================
+# ÚLTIMO FOLIO
+# =====================================================
+
+def ultimo_folio():
+
+    try:
+
+        respuesta = (
+
+            supabase
+
+            .table(TABLA)
+
+            .select(
+                "Folio"
+            )
+
+            .order(
+                "FechaCreacion",
+                desc=True
+            )
+
+            .limit(1)
+
+            .execute()
+
+        )
+
+        if not respuesta.data:
+
+            return None
+
+        return respuesta.data[0]["Folio"]
+
+    except:
+
+        return None

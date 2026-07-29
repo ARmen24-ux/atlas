@@ -26,10 +26,13 @@ st.set_page_config(
 # TITULO
 # =====================================================
 
-st.title("📊 Métricas ATLAS")
+st.title(
+    "📊 Métricas de Reportes ATLAS"
+)
+
 
 st.caption(
-    "Indicadores de desempeño de incidencias registradas"
+    "Indicadores estadísticos de incidencias registradas"
 )
 
 
@@ -41,7 +44,6 @@ st.divider()
 # CARGA DE DATOS
 # =====================================================
 
-
 try:
 
     df = cargar_reportes()
@@ -50,7 +52,7 @@ try:
 except Exception as e:
 
     st.error(
-        "No fue posible cargar las métricas."
+        "No fue posible cargar los datos."
     )
 
     st.exception(e)
@@ -59,34 +61,28 @@ except Exception as e:
 
 
 
-if df.empty:
-
-    st.info(
-        "No existen datos suficientes para generar métricas."
-    )
-
-    st.stop()
-
-
-
 # =====================================================
-# VALIDACIÓN
+# VALIDACIÓN DEL ESQUEMA
 # =====================================================
 
-
-columnas = [
+COLUMNAS_REQUERIDAS = [
 
     "Folio",
-    "Estado",
-    "Prioridad"
+    "FechaCreacion",
+    "Edificio",
+    "Area",
+    "Categoria",
+    "Prioridad",
+    "Estado"
 
 ]
 
 
 faltantes = [
 
-    c for c in columnas
-    if c not in df.columns
+    columna
+    for columna in COLUMNAS_REQUERIDAS
+    if columna not in df.columns
 
 ]
 
@@ -94,7 +90,15 @@ faltantes = [
 if faltantes:
 
     st.error(
-        f"Faltan columnas necesarias: {faltantes}"
+
+        f"""
+        El origen de datos no cumple el esquema oficial de ATLAS.
+
+        Columnas faltantes:
+
+        {faltantes}
+        """
+
     )
 
     st.stop()
@@ -102,27 +106,213 @@ if faltantes:
 
 
 # =====================================================
-# KPI PRINCIPALES
+# NORMALIZACIÓN
 # =====================================================
 
+df["FechaCreacion"] = pd.to_datetime(
 
-total_reportes = len(df)
+    df["FechaCreacion"],
 
+    errors="coerce"
+
+)
+
+
+
+# eliminar fechas inválidas
+
+df = df.dropna(
+
+    subset=[
+
+        "FechaCreacion"
+
+    ]
+
+)
+
+
+
+# =====================================================
+# FILTROS DE CONSULTA
+# =====================================================
+
+st.subheader(
+    "🎛 Filtros de análisis"
+)
+
+
+
+col1, col2, col3 = st.columns(3)
+
+
+
+with col1:
+
+    estado = st.selectbox(
+
+        "Estado",
+
+        [
+
+            "Todos"
+
+        ]
+        +
+        sorted(
+
+            df["Estado"]
+            .dropna()
+            .unique()
+            .tolist()
+
+        )
+
+    )
+
+
+
+with col2:
+
+    edificio = st.selectbox(
+
+        "Edificio",
+
+        [
+
+            "Todos"
+
+        ]
+        +
+        sorted(
+
+            df["Edificio"]
+            .dropna()
+            .unique()
+            .tolist()
+
+        )
+
+    )
+
+
+
+with col3:
+
+    prioridad = st.selectbox(
+
+        "Prioridad",
+
+        [
+
+            "Todos"
+
+        ]
+        +
+        sorted(
+
+            df["Prioridad"]
+            .dropna()
+            .unique()
+            .tolist()
+
+        )
+
+    )
+
+
+
+df_metricas = df.copy()
+
+
+
+if estado != "Todos":
+
+    df_metricas = df_metricas[
+
+        df_metricas["Estado"] == estado
+
+    ]
+
+
+
+if edificio != "Todos":
+
+    df_metricas = df_metricas[
+
+        df_metricas["Edificio"] == edificio
+
+    ]
+
+
+
+if prioridad != "Todos":
+
+    df_metricas = df_metricas[
+
+        df_metricas["Prioridad"] == prioridad
+
+    ]
+
+
+
+st.divider()
+
+
+
+# =====================================================
+# INDICADORES PRINCIPALES
+# =====================================================
+
+st.subheader(
+    "📌 Indicadores principales"
+)
+
+
+
+total = len(df_metricas)
 
 
 pendientes = len(
 
-    df[
-        df["estado"]
-        .str.lower()
+    df_metricas[
+
+        df_metricas["Estado"]
         .isin(
+
             [
-                "pendiente",
-                "en revisión",
-                "asignado",
-                "en proceso"
+
+                "Pendiente",
+
+                "En revisión"
+
             ]
+
         )
+
+    ]
+
+)
+
+
+
+proceso = len(
+
+    df_metricas[
+
+        df_metricas["Estado"]
+        .isin(
+
+            [
+
+                "Asignado",
+
+                "En proceso"
+
+            ]
+
+        )
+
     ]
 
 )
@@ -131,37 +321,16 @@ pendientes = len(
 
 completados = len(
 
-    df[
-        df["estado"]
-        .str.lower()
+    df_metricas[
+
+        df_metricas["Estado"]
+
         ==
-        "completado"
+
+        "Completado"
+
     ]
 
-)
-
-
-
-prioridad_alta = len(
-
-    df[
-        df["prioridad"]
-        .str.lower()
-        ==
-        "alta"
-    ]
-
-)
-
-
-
-# =====================================================
-# TARJETAS KPI
-# =====================================================
-
-
-st.subheader(
-    "📌 Indicadores generales"
 )
 
 
@@ -170,51 +339,43 @@ col1, col2, col3, col4 = st.columns(4)
 
 
 
-with col1:
+col1.metric(
 
-    st.metric(
+    "Total reportes",
 
-        "Total reportes",
+    total
 
-        total_reportes
-
-    )
+)
 
 
 
-with col2:
+col2.metric(
 
-    st.metric(
+    "Pendientes",
 
-        "Pendientes",
+    pendientes
 
-        pendientes
-
-    )
+)
 
 
 
-with col3:
+col3.metric(
 
-    st.metric(
+    "En proceso",
 
-        "Completados",
+    proceso
 
-        completados
-
-    )
+)
 
 
 
-with col4:
+col4.metric(
 
-    st.metric(
+    "Completados",
 
-        "Prioridad alta",
+    completados
 
-        prioridad_alta
-
-    )
+)
 
 
 
@@ -226,16 +387,17 @@ st.divider()
 # DISTRIBUCIÓN POR ESTADO
 # =====================================================
 
-
 st.subheader(
+
     "📍 Reportes por estado"
+
 )
 
 
 
-estado_df = (
+estado_data = (
 
-    df["estado"]
+    df_metricas["Estado"]
 
     .value_counts()
 
@@ -245,7 +407,7 @@ estado_df = (
 
 
 
-estado_df.columns = [
+estado_data.columns = [
 
     "Estado",
 
@@ -257,7 +419,7 @@ estado_df.columns = [
 
 fig_estado = px.bar(
 
-    estado_df,
+    estado_data,
 
     x="Estado",
 
@@ -265,7 +427,7 @@ fig_estado = px.bar(
 
     text="Cantidad",
 
-    title="Distribución actual de tickets"
+    title="Distribución de estados"
 
 )
 
@@ -282,19 +444,20 @@ st.plotly_chart(
 
 
 # =====================================================
-# DISTRIBUCIÓN POR PRIORIDAD
+# REPORTES POR EDIFICIO
 # =====================================================
 
-
 st.subheader(
-    "⚠️ Reportes por prioridad"
+
+    "🏢 Reportes por edificio"
+
 )
 
 
 
-prioridad_df = (
+edificio_data = (
 
-    df["prioridad"]
+    df_metricas["Edificio"]
 
     .value_counts()
 
@@ -304,9 +467,9 @@ prioridad_df = (
 
 
 
-prioridad_df.columns = [
+edificio_data.columns = [
 
-    "Prioridad",
+    "Edificio",
 
     "Cantidad"
 
@@ -314,15 +477,15 @@ prioridad_df.columns = [
 
 
 
-fig_prioridad = px.pie(
+fig_edificio = px.pie(
 
-    prioridad_df,
+    edificio_data,
 
-    names="Prioridad",
+    names="Edificio",
 
     values="Cantidad",
 
-    title="Distribución de prioridades"
+    title="Distribución por edificio"
 
 )
 
@@ -330,717 +493,210 @@ fig_prioridad = px.pie(
 
 st.plotly_chart(
 
-    fig_prioridad,
+    fig_edificio,
 
     use_container_width=True
 
 )
 
-# =====================================================
-# FASE 2
-# ANÁLISIS OPERATIVO
-# =====================================================
-
-
-st.divider()
-
-
-st.header(
-    "📈 Análisis operativo"
-)
-
 
 
 # =====================================================
-# REPORTES POR EDIFICIO
+# CATEGORÍAS PRINCIPALES
 # =====================================================
-
 
 st.subheader(
-    "🏢 Reportes por edificio"
+
+    "🏷 Categorías más frecuentes"
+
 )
 
 
 
-if "edificio" in df.columns:
+categoria_data = (
+
+    df_metricas["Categoria"]
+
+    .value_counts()
+
+    .head(10)
+
+    .reset_index()
+
+)
 
 
-    edificio_df = (
 
-        df["edificio"]
+categoria_data.columns = [
 
-        .value_counts()
+    "Categoria",
 
-        .reset_index()
+    "Cantidad"
 
-    )
+]
 
 
-    edificio_df.columns = [
+
+fig_categoria = px.bar(
+
+    categoria_data,
+
+    x="Categoria",
+
+    y="Cantidad",
+
+    text="Cantidad",
+
+    title="Top categorías"
+
+)
+
+
+
+st.plotly_chart(
+
+    fig_categoria,
+
+    use_container_width=True
+
+)
+
+
+
+# =====================================================
+# EVOLUCIÓN TEMPORAL
+# =====================================================
+
+st.subheader(
+
+    "📅 Tendencia de creación de reportes"
+
+)
+
+
+
+tiempo = (
+
+    df_metricas
+
+    .set_index("FechaCreacion")
+
+    .resample("D")
+
+    .size()
+
+    .reset_index()
+
+)
+
+
+
+tiempo.columns = [
+
+    "Fecha",
+
+    "Cantidad"
+
+]
+
+
+
+fig_tiempo = px.line(
+
+    tiempo,
+
+    x="Fecha",
+
+    y="Cantidad",
+
+    markers=True,
+
+    title="Reportes creados por día"
+
+)
+
+
+
+st.plotly_chart(
+
+    fig_tiempo,
+
+    use_container_width=True
+
+)
+
+
+
+# =====================================================
+# TABLA RESUMEN
+# =====================================================
+
+st.subheader(
+
+    "📑 Resumen de datos"
+
+)
+
+
+
+resumen = df_metricas[
+
+    [
+
+        "Folio",
+
+        "FechaCreacion",
 
         "Edificio",
 
-        "Cantidad"
+        "Area",
+
+        "Categoria",
+
+        "Prioridad",
+
+        "Estado"
 
     ]
-
-
-
-    fig_edificio = px.bar(
-
-        edificio_df,
-
-        x="Edificio",
-
-        y="Cantidad",
-
-        text="Cantidad",
-
-        title="Concentración de incidencias por edificio"
-
-    )
-
-
-    st.plotly_chart(
-
-        fig_edificio,
-
-        use_container_width=True
-
-    )
-
-
-else:
-
-    st.info(
-        "No existe información de edificios."
-    )
-
-
-
-# =====================================================
-# CATEGORÍAS FRECUENTES
-# =====================================================
-
-
-st.subheader(
-    "🔧 Principales categorías de falla"
-)
-
-
-
-if "categoria" in df.columns:
-
-
-    categoria_df = (
-
-        df["categoria"]
-
-        .value_counts()
-
-        .head(10)
-
-        .reset_index()
-
-    )
-
-
-    categoria_df.columns = [
-
-        "Categoría",
-
-        "Cantidad"
-
-    ]
-
-
-
-    fig_categoria = px.bar(
-
-        categoria_df,
-
-        x="Cantidad",
-
-        y="Categoría",
-
-        orientation="h",
-
-        text="Cantidad",
-
-        title="Categorías con mayor frecuencia"
-
-    )
-
-
-    st.plotly_chart(
-
-        fig_categoria,
-
-        use_container_width=True
-
-    )
-
-
-else:
-
-    st.info(
-        "No existe información de categorías."
-    )
-
-
-
-# =====================================================
-# TENDENCIA TEMPORAL
-# =====================================================
-
-
-st.subheader(
-    "📅 Tendencia mensual"
-)
-
-
-
-if "fecha" in df.columns:
-
-
-    df["fecha"] = pd.to_datetime(
-
-        df["fecha"],
-
-        errors="coerce"
-
-    )
-
-
-    tendencia = (
-
-        df
-
-        .dropna(subset=["fecha"])
-
-        .groupby(
-
-            df["fecha"]
-            .dt
-            .to_period("M")
-
-        )
-
-        .size()
-
-        .reset_index()
-
-    )
-
-
-    tendencia.columns = [
-
-        "Mes",
-
-        "Cantidad"
-
-    ]
-
-
-    tendencia["Mes"] = (
-
-        tendencia["Mes"]
-
-        .astype(str)
-
-    )
-
-
-
-    fig_tendencia = px.line(
-
-        tendencia,
-
-        x="Mes",
-
-        y="Cantidad",
-
-        markers=True,
-
-        title="Evolución mensual de reportes"
-
-    )
-
-
-    st.plotly_chart(
-
-        fig_tendencia,
-
-        use_container_width=True
-
-    )
-
-
-
-# =====================================================
-# ÁREAS CRÍTICAS
-# =====================================================
-
-
-st.subheader(
-    "📍 Áreas con mayor número de incidencias"
-)
-
-
-
-if "area" in df.columns:
-
-
-    area_df = (
-
-        df["area"]
-
-        .value_counts()
-
-        .head(10)
-
-        .reset_index()
-
-    )
-
-
-    area_df.columns = [
-
-        "Área",
-
-        "Cantidad"
-
-    ]
-
-
-
-    fig_area = px.bar(
-
-        area_df,
-
-        x="Área",
-
-        y="Cantidad",
-
-        text="Cantidad",
-
-        title="Carga de mantenimiento por área"
-
-    )
-
-
-    st.plotly_chart(
-
-        fig_area,
-
-        use_container_width=True
-
-    )
-
-
-else:
-
-    st.info(
-        "No existe información de áreas."
-    )
-
-# =====================================================
-# FASE 3
-# SLA Y DESEMPEÑO OPERATIVO
-# =====================================================
-
-
-st.divider()
-
-
-st.header(
-    "⏱ SLA y desempeño operativo"
-)
-
-
-
-# =====================================================
-# PREPARACIÓN DE FECHAS
-# =====================================================
-
-
-df_sla = df.copy()
-
-
-
-df_sla["fecha"] = pd.to_datetime(
-
-    df_sla["fecha"],
-
-    errors="coerce"
-
-)
-
-
-
-if "fecha_cierre" in df_sla.columns:
-
-
-    df_sla["fecha_cierre"] = pd.to_datetime(
-
-        df_sla["fecha_cierre"],
-
-        errors="coerce"
-
-    )
-
-
-
-# =====================================================
-# TIEMPO PROMEDIO DE RESOLUCIÓN
-# =====================================================
-
-
-st.subheader(
-    "⏱ Tiempo promedio de resolución"
-)
-
-
-
-if "fecha_cierre" in df_sla.columns:
-
-
-    cerrados = df_sla[
-
-        df_sla["fecha_cierre"].notna()
-
-    ].copy()
-
-
-
-    if not cerrados.empty:
-
-
-        cerrados["horas_resolucion"] = (
-
-            cerrados["fecha_cierre"]
-
-            -
-            cerrados["fecha"]
-
-        ).dt.total_seconds() / 3600
-
-
-
-        promedio = round(
-
-            cerrados["horas_resolucion"]
-
-            .mean(),
-
-            2
-
-        )
-
-
-
-        st.metric(
-
-            "Horas promedio",
-
-            f"{promedio} h"
-
-        )
-
-
-    else:
-
-
-        st.info(
-            "No existen tickets cerrados para calcular SLA."
-        )
-
-
-else:
-
-
-    st.info(
-        "La información de cierre todavía no está disponible."
-    )
-
-
-
-# =====================================================
-# CUMPLIMIENTO SLA
-# =====================================================
-
-
-st.subheader(
-    "📊 Cumplimiento SLA"
-)
-
-
-
-if "fecha_cierre" in df_sla.columns:
-
-
-    sla_data = df_sla[
-
-        df_sla["fecha_cierre"].notna()
-
-    ].copy()
-
-
-
-    if not sla_data.empty:
-
-
-        def obtener_sla(prioridad):
-
-            prioridad = str(prioridad).lower()
-
-
-            if prioridad == "alta":
-
-                return 24
-
-
-            elif prioridad == "media":
-
-                return 72
-
-
-            else:
-
-                return 168
-
-
-
-        sla_data["sla_horas"] = (
-
-            sla_data["prioridad"]
-
-            .apply(obtener_sla)
-
-        )
-
-
-
-        sla_data["horas_real"] = (
-
-            sla_data["fecha_cierre"]
-
-            -
-
-            sla_data["fecha"]
-
-        ).dt.total_seconds() / 3600
-
-
-
-        sla_data["cumple"] = (
-
-            sla_data["horas_real"]
-
-            <=
-
-            sla_data["sla_horas"]
-
-        )
-
-
-
-        cumplimiento = round(
-
-            sla_data["cumple"]
-
-            .mean()
-
-            *
-
-            100,
-
-            1
-
-        )
-
-
-
-        col1, col2 = st.columns(2)
-
-
-
-        with col1:
-
-            st.metric(
-
-                "Cumplimiento SLA",
-
-                f"{cumplimiento}%"
-
-            )
-
-
-
-        with col2:
-
-            fuera = len(
-
-                sla_data[
-
-                    sla_data["cumple"] == False
-
-                ]
-
-            )
-
-
-            st.metric(
-
-                "Fuera SLA",
-
-                fuera
-
-            )
-
-
-
-# =====================================================
-# AGING DE TICKETS ABIERTOS
-# =====================================================
-
-
-st.subheader(
-    "📅 Aging de tickets abiertos"
-)
-
-
-
-abiertos = df_sla[
-
-    ~df_sla["estado"]
-
-    .str.lower()
-
-    .isin(
-
-        [
-
-            "completado",
-
-            "cancelado"
-
-        ]
-
-    )
 
 ].copy()
 
 
 
-if not abiertos.empty:
+resumen["FechaCreacion"] = resumen[
 
+    "FechaCreacion"
 
-    ahora = pd.Timestamp.now()
+].dt.strftime(
 
+    "%d/%m/%Y %H:%M"
 
-
-    abiertos["dias_abierto"] = (
-
-        ahora
-
-        -
-
-        abiertos["fecha"]
-
-    ).dt.days
+)
 
 
 
-    def rango_edad(dias):
+resumen = resumen.rename(
 
-        if dias <= 1:
+    columns={
 
-            return "0-24 horas"
+        "FechaCreacion":"Fecha",
 
+        "Area":"Área",
 
-        elif dias <= 3:
+        "Categoria":"Categoría"
 
-            return "1-3 días"
+    }
 
-
-        else:
-
-            return "+3 días"
+)
 
 
 
-    abiertos["rango"] = (
+st.dataframe(
 
-        abiertos["dias_abierto"]
+    resumen,
 
-        .apply(rango_edad)
+    use_container_width=True,
 
-    )
-
-
-
-    aging = (
-
-        abiertos["rango"]
-
-        .value_counts()
-
-        .reset_index()
-
-    )
-
-
-
-    aging.columns = [
-
-        "Antigüedad",
-
-        "Cantidad"
-
-    ]
-
-
-
-    fig_aging = px.bar(
-
-        aging,
-
-        x="Antigüedad",
-
-        y="Cantidad",
-
-        text="Cantidad",
-
-        title="Antigüedad de incidencias abiertas"
-
-    )
-
-
-
-    st.plotly_chart(
-
-        fig_aging,
-
-        use_container_width=True
-
-    )
-
-
-else:
-
-
-    st.info(
-        "No existen tickets abiertos."
-    )
-
-# =====================================================
-# PIE DE PÁGINA
-# =====================================================
-
-
-st.caption(
-
-    "Módulo de análisis ATLAS - Solo consulta"
+    hide_index=True
 
 )

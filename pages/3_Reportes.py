@@ -16,70 +16,76 @@ st.set_page_config(
 )
 
 
-
 # =====================================================
 # TITULO
 # =====================================================
 
-st.title("Consulta de Reportes")
+st.title("📋 Consulta de Reportes")
 
 st.caption(
     "Consulta pública de incidencias registradas en ATLAS"
 )
-
 
 st.divider()
 
 
 
 # =====================================================
-# CARGA
+# CARGA DE DATOS
 # =====================================================
 
 try:
+
     df = cargar_reportes()
-    
-    # Mostrar columnas en formato organizado
-    st.write("### Estructura de columnas disponibles")
-    
-    # Crear 3 columnas para mostrar los nombres
-    col1, col2, col3 = st.columns(3)
-    
-    # Obtener lista de columnas
-    columnas = df.columns.tolist()
-    
-    # Dividir en grupos
-    chunk_size = len(columnas) // 3
-    if len(columnas) % 3 != 0:
-        chunk_size += 1
-    
-    with col1:
-        st.write("**Columnas 1-{}**".format(min(chunk_size, len(columnas))))
-        for col in columnas[:chunk_size]:
-            st.write(f"• {col}")
-    
-    with col2:
-        inicio = chunk_size
-        fin = min(chunk_size * 2, len(columnas))
-        st.write("**Columnas {}-{}**".format(inicio+1, fin))
-        for col in columnas[inicio:fin]:
-            st.write(f"• {col}")
-    
-    with col3:
-        inicio = chunk_size * 2
-        st.write("**Columnas {}-{}**".format(inicio+1, len(columnas)))
-        for col in columnas[inicio:]:
-            st.write(f"• {col}")
-    
-    st.divider()
-    
-    # Mostrar los datos en tabla
-    st.write("### 📊 Vista previa de datos")
-    st.dataframe(df.head(10), use_container_width=True)
-    
+
 except Exception as e:
-    st.error("No fue posible cargar los reportes.")
+
+    st.error(
+        "No fue posible cargar los reportes."
+    )
+
     st.exception(e)
+
+    st.stop()
+
+
+
+# =====================================================
+# VALIDACIÓN DE ESQUEMA
+# =====================================================
+
+COLUMNAS_BASE = [
+
+    "Folio",
+    "FechaCreacion",
+    "Edificio",
+    "Area",
+    "Categoria",
+    "Prioridad",
+    "Estado"
+
+]
+
+
+faltantes = [
+
+    col for col in COLUMNAS_BASE
+    if col not in df.columns
+
+]
+
+
+if faltantes:
+
+    st.error(
+        f"""
+        El origen de datos no cumple el esquema oficial de ATLAS.
+
+        Columnas faltantes:
+        {faltantes}
+        """
+    )
+
     st.stop()
 
 
@@ -88,12 +94,10 @@ except Exception as e:
 # NORMALIZACIÓN
 # =====================================================
 
-
 df["FechaCreacion"] = pd.to_datetime(
-    df["Fecha"],
+    df["FechaCreacion"],
     errors="coerce"
 )
-
 
 
 df = df.sort_values(
@@ -107,11 +111,9 @@ df = df.sort_values(
 # BUSCADOR
 # =====================================================
 
-
 st.subheader(
     "🔎 Buscar reporte"
 )
-
 
 
 busqueda = st.text_input(
@@ -129,7 +131,6 @@ df_filtrado = df.copy()
 
 
 if busqueda:
-
 
     df_filtrado = df_filtrado[
 
@@ -149,7 +150,6 @@ if busqueda:
 # FILTROS
 # =====================================================
 
-
 st.subheader(
     "🎛 Filtros"
 )
@@ -166,7 +166,9 @@ with col1:
 
         "Estado",
 
-        ["Todos"]
+        [
+            "Todos"
+        ]
         +
         sorted(
             df["Estado"]
@@ -185,7 +187,9 @@ with col2:
 
         "Prioridad",
 
-        ["Todos"]
+        [
+            "Todos"
+        ]
         +
         sorted(
             df["Prioridad"]
@@ -204,7 +208,9 @@ with col3:
 
         "Edificio",
 
-        ["Todos"]
+        [
+            "Todos"
+        ]
         +
         sorted(
             df["Edificio"]
@@ -214,6 +220,7 @@ with col3:
         )
 
     )
+
 
 
 
@@ -242,16 +249,13 @@ if edificio != "Todos":
 
 
 # =====================================================
-# RESULTADOS
+# MÉTRICAS
 # =====================================================
-
 
 st.divider()
 
 
-
 col1, col2 = st.columns(2)
-
 
 
 with col1:
@@ -263,7 +267,6 @@ with col1:
         len(df_filtrado)
 
     )
-
 
 
 with col2:
@@ -279,9 +282,8 @@ with col2:
 
 
 # =====================================================
-# TABLA
+# TABLA PRINCIPAL
 # =====================================================
-
 
 st.subheader(
     "📑 Reportes registrados"
@@ -291,37 +293,41 @@ st.subheader(
 
 tabla = df_filtrado[
 
-[
-"Folio",
-"FechaCreacion",
-"Edificio",
-"Área",
-"Categoría",
-"Prioridad",
-"Estado"
-]
+    [
+
+        "Folio",
+        "FechaCreacion",
+        "Edificio",
+        "Area",
+        "Categoria",
+        "Prioridad",
+        "Estado"
+
+    ]
 
 ].copy()
 
 
 
-tabla["FechaCreacion"] = tabla["FechaCreacion"].dt.strftime(
+tabla["FechaCreacion"] = tabla[
+    "FechaCreacion"
+].dt.strftime(
     "%d/%m/%Y %H:%M"
 )
 
 
 
-tabla.columns=[
+tabla = tabla.rename(
 
-"Folio",
-"Fecha",
-"Edificio",
-"Área",
-"Categoría",
-"Prioridad",
-"Estado"
+    columns={
 
-]
+        "FechaCreacion": "Fecha",
+        "Area": "Área",
+        "Categoria": "Categoría"
+
+    }
+
+)
 
 
 
@@ -342,9 +348,8 @@ seleccion = st.dataframe(
 
 
 # =====================================================
-# EXPORTAR CONSULTA
+# EXPORTACIÓN
 # =====================================================
-
 
 st.download_button(
 
@@ -363,11 +368,11 @@ st.download_button(
 
 
 # =====================================================
-# DETALLE
+# DETALLE DEL REPORTE
 # =====================================================
 
-
 st.divider()
+
 
 st.subheader(
     "🔎 Detalle del reporte"
@@ -385,33 +390,45 @@ if seleccion.selection.rows:
 
 
 
-    col1,col2,col3,col4 = st.columns(4)
+    col1, col2, col3, col4 = st.columns(4)
 
 
 
     col1.metric(
+
         "Folio",
+
         reporte["Folio"]
+
     )
+
 
 
     col2.metric(
+
         "Estado",
+
         reporte["Estado"]
+
     )
+
 
 
     col3.metric(
+
         "Prioridad",
+
         reporte["Prioridad"]
+
     )
+
 
 
     col4.metric(
 
         "Fecha",
 
-        reporte["Fecha"]
+        reporte["FechaCreacion"]
         .strftime("%d/%m/%Y")
 
     )
@@ -428,6 +445,7 @@ if seleccion.selection.rows:
 
 
     st.write(
+
         f"""
         **Edificio:** {reporte.get('Edificio','N/A')}
 
@@ -435,6 +453,7 @@ if seleccion.selection.rows:
 
         **Activo:** {reporte.get('Activo','No registrado')}
         """
+
     )
 
 
@@ -445,11 +464,13 @@ if seleccion.selection.rows:
 
 
     st.write(
+
         f"""
         **Categoría:** {reporte.get('Categoria','N/A')}
 
         **Impacto:** {reporte.get('Impacto','No registrado')}
         """
+
     )
 
 
@@ -462,8 +483,11 @@ if seleccion.selection.rows:
     st.info(
 
         reporte.get(
+
             "Descripcion",
+
             "Sin descripción"
+
         )
 
     )
@@ -475,9 +499,13 @@ if seleccion.selection.rows:
     )
 
 
+
     evidencia = reporte.get(
+
         "ImagenApertura",
+
         None
+
     )
 
 
@@ -492,7 +520,6 @@ if seleccion.selection.rows:
 
         )
 
-
     else:
 
         st.info(
@@ -505,5 +532,7 @@ else:
 
 
     st.info(
+
         "Seleccione un reporte para consultar detalles."
+
     )

@@ -21,7 +21,7 @@ st.set_page_config(
 # TITULO
 # =====================================================
 
-st.title("📋 Consulta de Reportes")
+st.title("Consulta de Reportes")
 
 st.caption(
     "Consulta pública de incidencias registradas en ATLAS"
@@ -36,32 +36,50 @@ st.divider()
 # CARGA
 # =====================================================
 
-
 try:
-
     df = cargar_reportes()
-
-    st.write(df.columns)
-    st.write(df.head())
-
+    
+    # Mostrar columnas en formato organizado
+    st.write("### Estructura de columnas disponibles")
+    
+    # Crear 3 columnas para mostrar los nombres
+    col1, col2, col3 = st.columns(3)
+    
+    # Obtener lista de columnas
+    columnas = df.columns.tolist()
+    
+    # Dividir en grupos
+    chunk_size = len(columnas) // 3
+    if len(columnas) % 3 != 0:
+        chunk_size += 1
+    
+    with col1:
+        st.write("**Columnas 1-{}**".format(min(chunk_size, len(columnas))))
+        for col in columnas[:chunk_size]:
+            st.write(f"• {col}")
+    
+    with col2:
+        inicio = chunk_size
+        fin = min(chunk_size * 2, len(columnas))
+        st.write("**Columnas {}-{}**".format(inicio+1, fin))
+        for col in columnas[inicio:fin]:
+            st.write(f"• {col}")
+    
+    with col3:
+        inicio = chunk_size * 2
+        st.write("**Columnas {}-{}**".format(inicio+1, len(columnas)))
+        for col in columnas[inicio:]:
+            st.write(f"• {col}")
+    
+    st.divider()
+    
+    # Mostrar los datos en tabla
+    st.write("### 📊 Vista previa de datos")
+    st.dataframe(df.head(10), use_container_width=True)
+    
 except Exception as e:
-
-    st.error(
-        "No fue posible cargar los reportes."
-    )
-
+    st.error("No fue posible cargar los reportes.")
     st.exception(e)
-
-    st.stop()
-
-
-
-if df.empty:
-
-    st.info(
-        "Actualmente no existen reportes registrados."
-    )
-
     st.stop()
 
 

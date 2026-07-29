@@ -33,9 +33,13 @@ def agregar_comentario(
 
     except Exception as e:
 
-        print(
+        import streamlit as st
+
+        st.error(
             f"Error guardando comentario: {e}"
         )
+
+        raise
 
 
 # =====================================================

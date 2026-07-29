@@ -10,6 +10,7 @@ from utils.comentarios import (
     agregar_comentario,
     obtener_comentarios
 )
+from database.supabase_client import supabase
 
 def aplicar_sla(df):
     df = df.copy()
@@ -30,26 +31,38 @@ st.set_page_config(
 st.title("ATLAS - Panel de Mantenimiento")
 
 # =====================================================
-# RUTAS
+# CARGA DE REPORTES DESDE SUPABASE
 # =====================================================
 
-RUTA_CSV = "data/reportes.csv"
+try:
 
-# =====================================================
-# CARGA DE DATOS
-# =====================================================
+    respuesta = (
+        supabase
+        .table("reportes")
+        .select("*")
+        .execute()
+    )
 
-if not os.path.exists(RUTA_CSV):
-    st.error("No existe el archivo de reportes")
+    df = pd.DataFrame(
+        respuesta.data
+    )
+
+except Exception as e:
+
+    st.error(
+        f"Error cargando reportes: {e}"
+    )
+
     st.stop()
 
-df = pd.read_csv(
-    RUTA_CSV,
-    keep_default_na=False
-)
 
-df = asegurar_esquema(df)
+if df.empty:
 
+    st.warning(
+        "No existen reportes registrados."
+    )
+
+    st.stop()
 # =====================================================
 # FORZAR COLUMNAS DE TEXTO
 # =====================================================
@@ -85,7 +98,8 @@ for col in columnas_texto:
 # NORMALIZACIÓN
 # =====================================================
 
-df["ID"] = df["ID"].astype(str)
+if "ID" in df.columns:
+    df["ID"] = df["ID"].astype(str)
 
 # =====================================================
 # FLUJO DE ESTADOS
@@ -291,7 +305,7 @@ if nuevo_estado == "Resuelto":
 # =====================================================
 # ACTUALIZACIÓN
 # =====================================================
-   
+
 if st.button("Guardar cambios"):
 
     if (
@@ -301,33 +315,30 @@ if st.button("Guardar cambios"):
         
         st.error(
             "Debes adjuntar evidencia de cierre."
-    )
+        )
         st.stop()
+
 
     ahora = datetime.now().strftime("%Y-%m-%d %H:%M")
+
     estado_anterior = ticket["Estado"]
 
-    idx = df.index[df["Folio"] == ticket_folio]
-
-    if len(idx) == 0:
-        st.error("Ticket no encontrado")
-        st.stop()
-
-    idx = idx[0]
 
     cambios = {}
 
+
+    # Cambio de estado
     if nuevo_estado != estado_anterior:
         cambios["Estado"] = nuevo_estado
 
+
+    # Cambio de responsable
     if responsable != ticket["Responsable"]:
         cambios["Responsable"] = responsable
 
+
     cambios["FechaActualizacion"] = ahora
 
-    # aplicar cambios de forma segura
-    for k, v in cambios.items():
-        df.loc[idx, k] = v
 
     # ==========================================
     # FECHAS AUTOMÁTICAS
@@ -335,23 +346,34 @@ if st.button("Guardar cambios"):
 
     if nuevo_estado == "Asignado":
 
-        if str(df.loc[idx, "FechaAsignacion"]).strip() == "":
-            df.loc[idx, "FechaAsignacion"] = ahora
+        if str(ticket["FechaAsignacion"]).strip() == "":
+            cambios["FechaAsignacion"] = ahora
+
 
     elif nuevo_estado == "Resuelto":
 
-        if str(df.loc[idx, "FechaResolucion"]).strip() == "":
-            df.loc[idx, "FechaResolucion"] = ahora
+        if str(ticket["FechaResolucion"]).strip() == "":
+            cambios["FechaResolucion"] = ahora
+
 
     elif nuevo_estado == "Cerrado":
 
-        if str(df.loc[idx, "FechaCierre"]).strip() == "":
-            df.loc[idx, "FechaCierre"] = ahora
+        if str(ticket["FechaCierre"]).strip() == "":
+            cambios["FechaCierre"] = ahora
 
-    # ====== IMAGEN CIERRE ======
+
+
+    # ==========================================
+    # IMAGEN DE CIERRE
+    # ==========================================
+
     if imagen_cierre is not None:
 
-        os.makedirs("evidencias", exist_ok=True)
+        os.makedirs(
+            "evidencias",
+            exist_ok=True
+        )
+
 
         nombre_img = (
             datetime.now().strftime("%Y%m%d%H%M%S")
@@ -359,30 +381,62 @@ if st.button("Guardar cambios"):
             + imagen_cierre.name
         )
 
-        ruta_img = os.path.join("evidencias", nombre_img)
 
-        with open(ruta_img, "wb") as f:
-            f.write(imagen_cierre.getbuffer())
+        ruta_img = os.path.join(
+            "evidencias",
+            nombre_img
+        )
 
-        df.loc[idx, "ImagenCierre"] = ruta_img
-        
-    df.to_csv(
-        RUTA_CSV,
-        index=False
-    )
-    
-    registrar_movimiento(
-        folio=ticket_folio,
-        usuario="Sistema",
-        accion="Cambio de estado",
-        detalle=f"{estado_anterior} → {nuevo_estado}"
-    )
 
-    st.success(
-        "Ticket actualizado correctamente"
-    )
+        with open(
+            ruta_img,
+            "wb"
+        ) as f:
 
-    st.rerun()
+            f.write(
+                imagen_cierre.getbuffer()
+            )
+
+
+        cambios["ImagenCierre"] = ruta_img
+
+
+
+    # ==========================================
+    # ACTUALIZAR SUPABASE
+    # ==========================================
+
+    try:
+
+        supabase.table("reportes").update(
+            cambios
+        ).eq(
+            "Folio",
+            ticket_folio
+        ).execute()
+
+
+        registrar_movimiento(
+            folio=ticket_folio,
+            usuario="Sistema",
+            accion="Cambio de estado",
+            detalle=f"{estado_anterior} → {nuevo_estado}"
+        )
+
+
+        st.success(
+            "Ticket actualizado correctamente"
+        )
+
+
+        st.rerun()
+
+
+    except Exception as e:
+
+        st.error(
+            f"Error actualizando ticket: {e}"
+        )
 
 # =====================================================
 # Bitácora técnica

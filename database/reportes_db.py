@@ -1,13 +1,13 @@
-import os
 import pandas as pd
 
-from utils.data_guard import asegurar_esquema
+from database.supabase_client import supabase
+
 
 # =====================================================
 # CONFIGURACIÓN
 # =====================================================
 
-RUTA_REPORTES = "data/reportes.csv"
+TABLA = "reportes"
 
 
 # =====================================================
@@ -15,149 +15,114 @@ RUTA_REPORTES = "data/reportes.csv"
 # =====================================================
 
 def cargar_reportes():
-
     """
-    Carga el archivo de reportes asegurando
-    el esquema oficial de ATLAS.
+    Obtiene todos los reportes desde Supabase.
     """
 
-    if not os.path.exists(RUTA_REPORTES):
+    try:
 
-        df = pd.DataFrame()
-
-        df = asegurar_esquema(df)
-
-        df.to_csv(
-            RUTA_REPORTES,
-            index=False
+        respuesta = (
+            supabase
+            .table(TABLA)
+            .select("*")
+            .order("FechaCreacion", desc=True)
+            .execute()
         )
+
+        datos = respuesta.data or []
+
+        df = pd.DataFrame(datos)
+
+        if df.empty:
+            return pd.DataFrame()
+
+        # Convertir fechas
+        columnas_fecha = [
+            "FechaCreacion",
+            "FechaAsignacion",
+            "FechaResolucion",
+            "FechaCierre",
+            "FechaActualizacion"
+        ]
+
+        for columna in columnas_fecha:
+
+            if columna in df.columns:
+
+                df[columna] = pd.to_datetime(
+                    df[columna],
+                    errors="coerce"
+                )
 
         return df
 
-    try:
-
-        df = pd.read_csv(
-            RUTA_REPORTES,
-            keep_default_na=False
-        )
-
-        return asegurar_esquema(df)
-
     except Exception as e:
 
         raise Exception(
-            f"Error al cargar reportes: {e}"
+            f"Error al cargar reportes desde Supabase: {e}"
         )
 
 
 # =====================================================
-# GUARDAR REPORTES
+# INSERTAR REPORTE
 # =====================================================
 
-def guardar_reportes(df):
-
+def guardar_reporte(datos: dict):
     """
-    Guarda el DataFrame de reportes.
+    Inserta un nuevo reporte.
     """
 
     try:
 
-        df = asegurar_esquema(df)
-
-        df.to_csv(
-            RUTA_REPORTES,
-            index=False
+        respuesta = (
+            supabase
+            .table(TABLA)
+            .insert(datos)
+            .execute()
         )
+
+        return respuesta.data
 
     except Exception as e:
 
         raise Exception(
-            f"Error al guardar reportes: {e}"
+            f"Error al guardar reporte: {e}"
         )
 
 
 # =====================================================
-# OBTENER UN REPORTE
+# OBTENER REPORTE POR FOLIO
 # =====================================================
 
 def obtener_reporte(folio):
-
     """
-    Devuelve un único reporte por folio.
-    """
-
-    df = cargar_reportes()
-
-    ticket = df[
-        df["Folio"] == folio
-    ]
-
-    if ticket.empty:
-
-        return None
-
-    return ticket.iloc[0]
-
-
-# =====================================================
-# FILTRAR REPORTES
-# =====================================================
-
-def filtrar_reportes(
-    estado=None,
-    prioridad=None,
-    edificio=None,
-    categoria=None
-):
-
-    """
-    Devuelve reportes filtrados.
-    Todos los parámetros son opcionales.
+    Devuelve un único reporte.
     """
 
-    df = cargar_reportes()
+    try:
 
-    if estado:
+        respuesta = (
+            supabase
+            .table(TABLA)
+            .select("*")
+            .eq("Folio", folio)
+            .limit(1)
+            .execute()
+        )
 
-        if isinstance(estado, list):
+        if not respuesta.data:
 
-            df = df[
-                df["Estado"].isin(estado)
-            ]
+            return None
 
-        else:
+        reporte = respuesta.data[0]
 
-            df = df[
-                df["Estado"] == estado
-            ]
+        return pd.Series(reporte)
 
-    if prioridad:
+    except Exception as e:
 
-        if isinstance(prioridad, list):
-
-            df = df[
-                df["Prioridad"].isin(prioridad)
-            ]
-
-        else:
-
-            df = df[
-                df["Prioridad"] == prioridad
-            ]
-
-    if edificio:
-
-        df = df[
-            df["Edificio"] == edificio
-        ]
-
-    if categoria:
-
-        df = df[
-            df["Categoria"] == categoria
-        ]
-
-    return df
+        raise Exception(
+            f"Error al obtener reporte: {e}"
+        )
 
 
 # =====================================================
@@ -168,82 +133,50 @@ def actualizar_reporte(
     folio,
     cambios
 ):
-
     """
-    Actualiza uno o varios campos de un reporte.
-
-    cambios = {
-        "Estado":"Asignado",
-        "Responsable":"Juan"
-    }
+    Actualiza un reporte usando el Folio.
     """
 
-    df = cargar_reportes()
+    try:
 
-    idx = df.index[
-        df["Folio"] == folio
-    ]
+        respuesta = (
+            supabase
+            .table(TABLA)
+            .update(cambios)
+            .eq("Folio", folio)
+            .execute()
+        )
 
-    if len(idx) == 0:
+        return respuesta.data
+
+    except Exception as e:
 
         raise Exception(
-            "Reporte no encontrado."
+            f"Error al actualizar reporte: {e}"
         )
-
-    idx = idx[0]
-
-    for campo, valor in cambios.items():
-
-        if campo in df.columns:
-
-            df.loc[idx, campo] = valor
-
-    guardar_reportes(df)
 
 
 # =====================================================
-# ESTADÍSTICAS GENERALES
+# ELIMINAR REPORTE
 # =====================================================
 
-def estadisticas_generales():
-
+def eliminar_reporte(folio):
     """
-    Devuelve indicadores básicos del sistema.
+    Elimina un reporte.
     """
 
-    df = cargar_reportes()
+    try:
 
-    return {
-
-        "total": len(df),
-
-        "pendientes": len(
-            df[
-                df["Estado"] == "Pendiente"
-            ]
-        ),
-
-        "asignados": len(
-            df[
-                df["Estado"] == "Asignado"
-            ]
-        ),
-
-        "en_proceso": len(
-            df[
-                df["Estado"] == "En proceso"
-            ]
-        ),
-
-        "resueltos": len(
-            df[
-                df["Estado"] == "Resuelto"
-            ]
-        ),
-
-        "cerrados": len(
-            df[
-                df["Estado"] == "Cerrado"
-            ]
+        (
+            supabase
+            .table(TABLA)
+            .delete()
+            .eq("Folio", folio)
+            .execute()
         )
-    }
+
+    except Exception as e:
+
+        raise Exception(
+            f"Error al eliminar reporte: {e}"
+        )

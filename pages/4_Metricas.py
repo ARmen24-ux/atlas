@@ -76,9 +76,9 @@ if df.empty:
 
 columnas = [
 
-    "folio",
-    "estado",
-    "prioridad"
+    "Folio",
+    "Estado",
+    "Prioridad"
 
 ]
 

@@ -41,6 +41,8 @@ try:
 
     df = cargar_reportes()
 
+    st.write(df.columns)
+    st.write(df.head())
 
 except Exception as e:
 
@@ -69,15 +71,15 @@ if df.empty:
 # =====================================================
 
 
-df["fecha"] = pd.to_datetime(
-    df["fecha"],
+df["Fecha"] = pd.to_datetime(
+    df["Fecha"],
     errors="coerce"
 )
 
 
 
 df = df.sort_values(
-    "fecha",
+    "Fecha",
     ascending=False
 )
 
@@ -113,7 +115,7 @@ if busqueda:
 
     df_filtrado = df_filtrado[
 
-        df_filtrado["folio"]
+        df_filtrado["Folio"]
         .astype(str)
         .str.contains(
             busqueda,
@@ -149,7 +151,7 @@ with col1:
         ["Todos"]
         +
         sorted(
-            df["estado"]
+            df["Estado"]
             .dropna()
             .unique()
             .tolist()
@@ -168,7 +170,7 @@ with col2:
         ["Todos"]
         +
         sorted(
-            df["prioridad"]
+            df["Prioridad"]
             .dropna()
             .unique()
             .tolist()
@@ -187,7 +189,7 @@ with col3:
         ["Todos"]
         +
         sorted(
-            df["edificio"]
+            df["Edificio"]
             .dropna()
             .unique()
             .tolist()
@@ -200,7 +202,7 @@ with col3:
 if estado != "Todos":
 
     df_filtrado = df_filtrado[
-        df_filtrado["estado"] == estado
+        df_filtrado["Estado"] == estado
     ]
 
 
@@ -208,7 +210,7 @@ if estado != "Todos":
 if prioridad != "Todos":
 
     df_filtrado = df_filtrado[
-        df_filtrado["prioridad"] == prioridad
+        df_filtrado["Prioridad"] == prioridad
     ]
 
 
@@ -216,7 +218,7 @@ if prioridad != "Todos":
 if edificio != "Todos":
 
     df_filtrado = df_filtrado[
-        df_filtrado["edificio"] == edificio
+        df_filtrado["Edificio"] == edificio
     ]
 
 
@@ -272,20 +274,20 @@ st.subheader(
 tabla = df_filtrado[
 
 [
-"folio",
-"fecha",
-"edificio",
-"area",
-"categoria",
-"prioridad",
-"estado"
+"Folio",
+"Fecha",
+"Edificio",
+"Área",
+"Categoría",
+"Prioridad",
+"Estado"
 ]
 
 ].copy()
 
 
 
-tabla["fecha"] = tabla["fecha"].dt.strftime(
+tabla["Fecha"] = tabla["Fecha"].dt.strftime(
     "%d/%m/%Y %H:%M"
 )
 
@@ -371,19 +373,19 @@ if seleccion.selection.rows:
 
     col1.metric(
         "Folio",
-        reporte["folio"]
+        reporte["Folio"]
     )
 
 
     col2.metric(
         "Estado",
-        reporte["estado"]
+        reporte["Estado"]
     )
 
 
     col3.metric(
         "Prioridad",
-        reporte["prioridad"]
+        reporte["Prioridad"]
     )
 
 
@@ -391,7 +393,7 @@ if seleccion.selection.rows:
 
         "Fecha",
 
-        reporte["fecha"]
+        reporte["Fecha"]
         .strftime("%d/%m/%Y")
 
     )
@@ -409,11 +411,11 @@ if seleccion.selection.rows:
 
     st.write(
         f"""
-        **Edificio:** {reporte.get('edificio','N/A')}
+        **Edificio:** {reporte.get('Edificio','N/A')}
 
-        **Área:** {reporte.get('area','N/A')}
+        **Área:** {reporte.get('Área','N/A')}
 
-        **Activo:** {reporte.get('activo','No registrado')}
+        **Activo:** {reporte.get('Activo','No registrado')}
         """
     )
 
@@ -426,9 +428,9 @@ if seleccion.selection.rows:
 
     st.write(
         f"""
-        **Categoría:** {reporte.get('categoria','N/A')}
+        **Categoría:** {reporte.get('Categoría','N/A')}
 
-        **Impacto:** {reporte.get('impacto','No registrado')}
+        **Impacto:** {reporte.get('Impacto','No registrado')}
         """
     )
 

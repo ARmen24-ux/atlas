@@ -71,7 +71,7 @@ if df.empty:
 # =====================================================
 
 
-df["Fecha"] = pd.to_datetime(
+df["FechaCreacion"] = pd.to_datetime(
     df["Fecha"],
     errors="coerce"
 )
@@ -79,7 +79,7 @@ df["Fecha"] = pd.to_datetime(
 
 
 df = df.sort_values(
-    "Fecha",
+    "FechaCreacion",
     ascending=False
 )
 
@@ -275,7 +275,7 @@ tabla = df_filtrado[
 
 [
 "Folio",
-"Fecha",
+"FechaCreacion",
 "Edificio",
 "Área",
 "Categoría",
@@ -287,7 +287,7 @@ tabla = df_filtrado[
 
 
 
-tabla["Fecha"] = tabla["Fecha"].dt.strftime(
+tabla["FechaCreacion"] = tabla["FechaCreacion"].dt.strftime(
     "%d/%m/%Y %H:%M"
 )
 
@@ -413,7 +413,7 @@ if seleccion.selection.rows:
         f"""
         **Edificio:** {reporte.get('Edificio','N/A')}
 
-        **Área:** {reporte.get('Área','N/A')}
+        **Área:** {reporte.get('Area','N/A')}
 
         **Activo:** {reporte.get('Activo','No registrado')}
         """
@@ -428,7 +428,7 @@ if seleccion.selection.rows:
 
     st.write(
         f"""
-        **Categoría:** {reporte.get('Categoría','N/A')}
+        **Categoría:** {reporte.get('Categoria','N/A')}
 
         **Impacto:** {reporte.get('Impacto','No registrado')}
         """
@@ -444,7 +444,7 @@ if seleccion.selection.rows:
     st.info(
 
         reporte.get(
-            "descripcion",
+            "Descripcion",
             "Sin descripción"
         )
 
@@ -458,7 +458,7 @@ if seleccion.selection.rows:
 
 
     evidencia = reporte.get(
-        "evidencia_url",
+        "ImagenApertura",
         None
     )
 

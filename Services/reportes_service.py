@@ -3,7 +3,7 @@ import pandas as pd
 
 from database.reportes_db import (
     cargar_reportes,
-    guardar_reportes
+    guardar_reporte
 )
 
 from Services.evidencias_service import (
@@ -61,9 +61,9 @@ def crear_reporte(datos):
 
         anio = datetime.now().year
 
-        folio = (
-            f"UTG-{anio}-{nuevo_id:05d}"
-        )
+        contador = len(df) + 1
+
+        folio = f"UTG-{anio}-{contador:05d}"
 
         # ==========================
         # Fechas
@@ -78,8 +78,6 @@ def crear_reporte(datos):
         # ==========================
 
         nuevo = {
-
-            "ID": nuevo_id,
 
             "Folio": folio,
 
@@ -126,15 +124,7 @@ def crear_reporte(datos):
         # Guardar
         # ==========================
 
-        df = pd.concat(
-            [
-                df,
-                pd.DataFrame([nuevo])
-            ],
-            ignore_index=True
-        )
-
-        guardar_reportes(df)
+        guardar_reporte(nuevo)
 
         # ==========================
         # Historial

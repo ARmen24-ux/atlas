@@ -531,14 +531,28 @@ st.subheader("🕓 Historial del ticket")
 
 try:
 
-    historial = pd.read_csv(
-        "data/historial.csv",
-        keep_default_na=False
+    historial = supabase.table(
+        "historial"
+    ).select("*").eq(
+        "Folio",
+    ticket_folio
+    ).execute()
+
+    historial_ticket = pd.DataFrame(
+        historial.data
     )
 
-    historial_ticket = historial[
-        historial["Folio"] == ticket_folio
-    ]
+    if "Folio" not in historial.columns:
+
+        st.warning(
+        "El historial no contiene la columna Folio."
+    )
+
+    else:
+
+        historial_ticket = historial[
+            historial["Folio"] == ticket_folio
+        ]
 
     if historial_ticket.empty:
 

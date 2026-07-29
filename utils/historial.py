@@ -1,29 +1,6 @@
-import pandas as pd
-import os
 from datetime import datetime
 
-RUTA_HISTORIAL = "data/historial.csv"
-
-COLUMNAS_HISTORIAL = [
-    "Fecha",
-    "Folio",
-    "Usuario",
-    "Accion",
-    "Detalle"
-]
-
-def inicializar_historial():
-
-    os.makedirs("data", exist_ok=True)
-
-    if not os.path.exists(RUTA_HISTORIAL):
-
-        pd.DataFrame(
-            columns=COLUMNAS_HISTORIAL
-        ).to_csv(
-            RUTA_HISTORIAL,
-            index=False
-        )
+from database.supabase_client import supabase
 
 
 def registrar_movimiento(
@@ -33,29 +10,26 @@ def registrar_movimiento(
     detalle=""
 ):
 
-    inicializar_historial()
+    try:
 
-    df = pd.read_csv(
-        RUTA_HISTORIAL,
-        keep_default_na=False
-    )
+        supabase.table(
+            "historial"
+        ).insert({
 
-    nuevo = {
-        "Fecha": datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
-        ),
-        "Folio": folio,
-        "Usuario": usuario,
-        "Accion": accion,
-        "Detalle": detalle
-    }
+            "Fecha": datetime.now().isoformat(),
 
-    df = pd.concat(
-        [df, pd.DataFrame([nuevo])],
-        ignore_index=True
-    )
+            "Folio": folio,
 
-    df.to_csv(
-        RUTA_HISTORIAL,
-        index=False
-    )
+            "Usuario": usuario,
+
+            "Accion": accion,
+
+            "Detalle": detalle
+
+        }).execute()
+
+    except Exception as e:
+
+        print(
+            f"Error guardando historial: {e}"
+        )

@@ -1,5 +1,4 @@
 from datetime import datetime
-import pandas as pd
 
 from database.reportes_db import (
     cargar_reportes,
@@ -15,133 +14,107 @@ from utils.historial import (
 )
 
 
+# =====================================================
+# CREAR REPORTE
+# =====================================================
+
 def crear_reporte(datos):
 
     try:
 
-        # ==========================
-        # Cargar reportes existentes
-        # ==========================
+        # ==========================================
+        # Obtener reportes existentes
+        # ==========================================
 
         df = cargar_reportes()
 
-        # ==========================
+        # ==========================================
         # Guardar imagen
-        # ==========================
+        # ==========================================
 
         ruta_img = guardar_imagen(
             datos.get("imagen")
         )
 
-        # ==========================
-        # Generar ID
-        # ==========================
-
-        if len(df) == 0:
-
-            nuevo_id = 1
-
-        else:
-
-            nuevo_id = (
-                pd.to_numeric(
-                    df["ID"],
-                    errors="coerce"
-                )
-                .fillna(0)
-                .max()
-                + 1
-            )
-
-            nuevo_id = int(nuevo_id)
-
-        # ==========================
-        # Generar folio
-        # ==========================
+        # ==========================================
+        # Generar Folio
+        # ==========================================
 
         anio = datetime.now().year
 
-        contador = len(df) + 1
+        consecutivo = len(df) + 1
 
-        folio = f"UTG-{anio}-{contador:05d}"
+        folio = f"UTG-{anio}-{consecutivo:05d}"
 
-        # ==========================
-        # Fechas
-        # ==========================
+        # ==========================================
+        # Fecha actual
+        # ==========================================
 
-        fecha_actual = datetime.now().strftime(
-            "%Y-%m-%d %H:%M"
-        )
+        ahora = datetime.now()
 
-        # ==========================
-        # Construir reporte
-        # ==========================
+        # ==========================================
+        # Construir registro
+        # ==========================================
 
-        nuevo = {
+        reporte = {
 
             "Folio": folio,
 
-            "FechaCreacion": fecha_actual,
+            "FechaCreacion": ahora.isoformat(),
 
-            "FechaAsignacion": "",
-
-            "FechaResolucion": "",
-
-            "FechaCierre": "",
-
-            "FechaActualizacion": fecha_actual,
-
-            "Edificio": datos["edificio"],
-
-            "Area": datos["area"],
-
-            "UbicacionDetalle":
-                datos["ubicacion_detalle"],
-
-            "Activo": datos["activo"],
-
-            "Categoria": datos["categoria"],
-
-            "Impacto": datos["impacto"],
-
-            "Prioridad": datos["prioridad"],
-
-            "Descripcion":
-                datos["descripcion"],
+            "FechaActualizacion": ahora.isoformat(),
 
             "Estado": "Pendiente",
 
-            "Responsable": "Sin asignar",
+            "Prioridad": datos["prioridad"],
 
-            "ComentarioCierre": "",
+            "Categoria": datos["categoria"],
+
+            "Area": datos["area"],
+
+            "Edificio": datos["edificio"],
+
+            "Activo": datos["activo"],
+
+            "Descripcion": datos["descripcion"],
+
+            "Impacto": datos["impacto"],
 
             "ImagenApertura": ruta_img,
 
-            "ImagenCierre": ""
+            "ImagenCierre": None,
+
+            "UsuarioReporta": "Sistema",
+
+            "UsuarioAsignado": None,
+
+            "SLAHoras": None,
+
+            "SLACumplido": None
+
         }
 
-        # ==========================
-        # Guardar
-        # ==========================
+        # ==========================================
+        # Insertar en Supabase
+        # ==========================================
 
-        guardar_reporte(nuevo)
+        guardar_reporte(reporte)
 
-        # ==========================
+        # ==========================================
         # Historial
-        # ==========================
+        # ==========================================
 
         registrar_movimiento(
+
             folio=folio,
+
             usuario="Sistema",
+
             accion="Creación",
-            detalle="Reporte creado por usuario"
+
+            detalle="Reporte creado"
+
         )
-
-        print("Historial registrado:", folio)
-
-        # ==========================
-        # Respuesta
-        # ==========================
 
         return {
 
@@ -149,8 +122,8 @@ def crear_reporte(datos):
 
             "folio": folio,
 
-            "mensaje":
-                f"Reporte enviado correctamente. Folio: {folio}"
+            "mensaje": f"Reporte registrado correctamente.\n\nFolio: {folio}"
+
         }
 
     except Exception as e:
@@ -159,6 +132,6 @@ def crear_reporte(datos):
 
             "ok": False,
 
-            "mensaje":
-                f"Error al crear reporte: {e}"
+            "mensaje": str(e)
+
         }

@@ -2,7 +2,7 @@ import pandas as pd
 
 from database.supabase_client import supabase
 
-
+from database.schema import COLUMNAS_REPORTES
 # =====================================================
 # CONFIGURACIÓN
 # =====================================================
@@ -34,7 +34,7 @@ def cargar_reportes():
         df = pd.DataFrame(datos)
 
         if df.empty:
-            return pd.DataFrame()
+            return pd.DataFrame(columns=COLUMNAS_REPORTES)
 
         # Convertir fechas
         columnas_fecha = [

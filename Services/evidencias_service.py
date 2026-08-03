@@ -1,42 +1,77 @@
-import os
-from datetime import datetime
+from io import BytesIO
+from PIL import Image, ImageOps
 
 
-CARPETA = "assets/evidencias"
+# =====================================================
+# CONFIGURACIÓN
+# =====================================================
+
+MAX_PIXELS = 1600          # Resolución máxima
+CALIDAD_JPG = 82           # Calidad JPEG
 
 
-def guardar_imagen(imagen):
+# =====================================================
+# COMPRIMIR IMAGEN
+# =====================================================
 
-    if imagen is None:
+def comprimir_imagen(archivo):
+    """
+    Recibe un UploadedFile de Streamlit.
 
-        return ""
+    Devuelve:
 
-    os.makedirs(
-        CARPETA,
-        exist_ok=True
+        bytes_jpg
+    """
+
+    if archivo is None:
+        return None
+
+    # ---------------------------------------------
+    # Abrir imagen
+    # ---------------------------------------------
+
+    imagen = Image.open(archivo)
+
+    # ---------------------------------------------
+    # Corregir orientación EXIF
+    # ---------------------------------------------
+
+    imagen = ImageOps.exif_transpose(imagen)
+
+    # ---------------------------------------------
+    # Convertir a RGB
+    # (PNG puede venir en RGBA)
+    # ---------------------------------------------
+
+    if imagen.mode != "RGB":
+        imagen = imagen.convert("RGB")
+
+    # ---------------------------------------------
+    # Redimensionar
+    # ---------------------------------------------
+
+    imagen.thumbnail(
+        (MAX_PIXELS, MAX_PIXELS)
     )
 
-    nombre = (
-        datetime.now().strftime(
-            "%Y%m%d%H%M%S"
-        )
-        + "_"
-        + imagen.name
+    # ---------------------------------------------
+    # Guardar en memoria
+    # ---------------------------------------------
+
+    salida = BytesIO()
+
+    imagen.save(
+
+        salida,
+
+        format="JPEG",
+
+        quality=CALIDAD_JPG,
+
+        optimize=True
+
     )
 
-    ruta = os.path.join(
-        CARPETA,
-        nombre
-    )
+    salida.seek(0)
 
-    with open(
-        ruta,
-        "wb"
-    ) as f:
-
-        f.write(
-            imagen.getbuffer()
-        )
-
-    return ruta
-
+    return salida

@@ -12,6 +12,7 @@ from Services.reportes_service import (
     crear_reporte
 )
 
+from Services.reportes_service import comprimir_imagen
 # =====================================================
 # CONFIGURACIÓN
 # =====================================================
@@ -129,8 +130,24 @@ with st.form("formulario_reporte"):
 
     if imagen is not None:
 
+        jpg = comprimir_imagen(imagen)
+
         st.success(
             "Imagen capturada"
+        )
+
+        st.write(
+            f"📦 Tamaño original: {imagen.size/1024:.1f} KB"
+        )
+
+        st.write(
+            f"🗜️ Tamaño comprimido: {len(jpg.getvalue())/1024:.1f} KB"
+        )
+
+        st.image(
+            jpg,
+            caption="Vista previa comprimida",
+            use_container_width=True
         )
 
     enviar = st.form_submit_button(

@@ -12,7 +12,7 @@ from Services.reportes_service import (
     crear_reporte
 )
 
-from Services.reportes_service import comprimir_imagen
+from Services.evidencias_service import comprimir_imagen
 # =====================================================
 # CONFIGURACIÓN
 # =====================================================

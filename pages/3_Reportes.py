@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
-import os
 
 from database.reportes_db import cargar_reportes
-
+from Services.evidencias_service import obtener_url_publica
 
 # =====================================================
 # CONFIGURACIÓN
@@ -498,27 +497,31 @@ if seleccion.selection.rows:
         "### 📷 Evidencia inicial"
     )
 
-
-
-    evidencia = reporte.get(
-
-        "ImagenApertura",
-
-        None
-
-    )
-
-
-
-    if evidencia and os.path.exists(evidencia):
-
-        st.image(
-
-            evidencia,
-
-            use_container_width=True
-
+    evidencia = str(
+        reporte.get(
+            "ImagenApertura",
+            ""
         )
+    ).strip()
+
+    if evidencia not in ["", "None", "nan"]:
+
+        try:
+
+            url = obtener_url_publica(
+                evidencia
+            )
+
+            st.image(
+                url,
+                use_container_width=True
+            )
+
+        except Exception as e:
+
+            st.warning(
+                f"No fue posible cargar la evidencia: {e}"
+            )
 
     else:
 

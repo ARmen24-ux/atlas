@@ -1,5 +1,7 @@
 from io import BytesIO
 from PIL import Image, ImageOps
+import os
+from datetime import datetime
 
 
 # =====================================================
@@ -75,3 +77,46 @@ def comprimir_imagen(archivo):
     salida.seek(0)
 
     return salida
+
+# =====================================================
+# GUARDAR IMAGEN (COMPATIBILIDAD)
+# =====================================================
+
+CARPETA = "assets/evidencias"
+
+
+def guardar_imagen(archivo):
+    """
+    Guarda una imagen comprimida localmente.
+
+    Esta función existe únicamente para mantener
+    compatibilidad con el sistema actual mientras
+    se migra a Supabase Storage.
+    """
+
+    if archivo is None:
+        return ""
+
+    os.makedirs(
+        CARPETA,
+        exist_ok=True
+    )
+
+    nombre = (
+        datetime.now().strftime("%Y%m%d%H%M%S")
+        + "_"
+        + archivo.name.rsplit(".", 1)[0]
+        + ".jpg"
+    )
+
+    ruta = os.path.join(
+        CARPETA,
+        nombre
+    )
+
+    imagen = comprimir_imagen(archivo)
+
+    with open(ruta, "wb") as f:
+        f.write(imagen.getvalue())
+
+    return ruta

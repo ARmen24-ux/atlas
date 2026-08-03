@@ -1,8 +1,9 @@
 from io import BytesIO
 from PIL import Image, ImageOps
-import os
 from datetime import datetime
 
+from database.supabase_client import supabase
+import uuid
 
 # =====================================================
 # CONFIGURACIÓN
@@ -79,44 +80,44 @@ def comprimir_imagen(archivo):
     return salida
 
 # =====================================================
-# GUARDAR IMAGEN (COMPATIBILIDAD)
+# SUBIR IMAGEN A SUPABASE STORAGE
 # =====================================================
-
-CARPETA = "assets/evidencias"
-
 
 def guardar_imagen(archivo):
     """
-    Guarda una imagen comprimida localmente.
+    Comprime la imagen y la sube al bucket
+    'evidencias' de Supabase Storage.
 
-    Esta función existe únicamente para mantener
-    compatibilidad con el sistema actual mientras
-    se migra a Supabase Storage.
+    Devuelve la ruta almacenada en el bucket.
     """
 
     if archivo is None:
         return ""
 
-    os.makedirs(
-        CARPETA,
-        exist_ok=True
-    )
+    # Comprimir imagen
+    imagen = comprimir_imagen(archivo)
 
+    # Nombre único
     nombre = (
         datetime.now().strftime("%Y%m%d%H%M%S")
         + "_"
-        + archivo.name.rsplit(".", 1)[0]
+        + str(uuid.uuid4())[:8]
         + ".jpg"
     )
 
-    ruta = os.path.join(
-        CARPETA,
-        nombre
+    ruta = (
+        f"apertura/"
+        f"{datetime.now().year}/"
+        f"{nombre}"
     )
 
-    imagen = comprimir_imagen(archivo)
-
-    with open(ruta, "wb") as f:
-        f.write(imagen.getvalue())
+    # Subir al bucket
+    supabase.storage.from_("evidencias").upload(
+        path=ruta,
+        file=imagen.getvalue(),
+        file_options={
+            "content-type": "image/jpeg"
+        }
+    )
 
     return ruta

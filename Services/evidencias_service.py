@@ -83,7 +83,10 @@ def comprimir_imagen(archivo):
 # SUBIR IMAGEN A SUPABASE STORAGE
 # =====================================================
 
-def guardar_imagen(archivo):
+def subir_imagen_supabase(
+    archivo,
+    carpeta="apertura"
+):
     """
     Comprime la imagen y la sube al bucket
     'evidencias' de Supabase Storage.
@@ -106,7 +109,7 @@ def guardar_imagen(archivo):
     )
 
     ruta = (
-        f"apertura/"
+        f"{carpeta}/"
         f"{datetime.now().year}/"
         f"{nombre}"
     )
@@ -131,11 +134,9 @@ def obtener_url_publica(ruta):
     if ruta in ["", None]:
         return ""
 
-    respuesta = (
+    return (
         supabase
         .storage
         .from_("evidencias")
         .get_public_url(ruta)
     )
-
-    return respuesta

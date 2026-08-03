@@ -121,3 +121,21 @@ def guardar_imagen(archivo):
     )
 
     return ruta
+
+# =====================================================
+# OBTENER URL PÚBLICA
+# =====================================================
+
+def obtener_url_publica(ruta):
+
+    if ruta in ["", None]:
+        return ""
+
+    respuesta = (
+        supabase
+        .storage
+        .from_("evidencias")
+        .get_public_url(ruta)
+    )
+
+    return respuesta

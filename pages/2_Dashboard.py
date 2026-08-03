@@ -11,6 +11,7 @@ from utils.comentarios import (
     obtener_comentarios
 )
 from database.supabase_client import supabase
+from Services.evidencias_service import obtener_url_publica
 
 def aplicar_sla(df):
     df = df.copy()
@@ -192,53 +193,37 @@ if ruta_imagen not in ["", "nan", "None"]:
 
     st.write("### Evidencia inicial")
 
-    if os.path.exists(ruta_imagen):
+    url = obtener_url_publica(ruta_imagen)
 
-        try:
-
-            st.image(
-                ruta_imagen,
-                caption="Evidencia inicial",
-                use_container_width=True
-            )
-
-        except Exception as e:
-
-            st.error(
-                f"No se pudo abrir la imagen: {e}"
-            )
-
-    else:
-
-        st.warning(
-            "La imagen fue registrada pero el archivo no fue encontrado."
-        )
-
-        st.code(ruta_imagen)
-st.write("Ruta:", ruta_imagen)
-
-st.write(
-    "Existe:",
-    os.path.exists(ruta_imagen)
-)
+    st.image(
+        url,
+        caption="Evidencia inicial",
+        use_container_width=True
+    )
 # =====================================================
 # FOTO FINAL
 # =====================================================
 
-if str(ticket["ImagenCierre"]).strip() != "":
+ruta_cierre = str(
+    ticket.get("ImagenCierre", "")
+).strip()
 
-    if os.path.exists(
-        ticket["ImagenCierre"]
-    ):
 
-        st.write(
-            "### Evidencia final"
-        )
+if ruta_cierre not in ["", "nan", "None"]:
 
-        st.image(
-            ticket["ImagenCierre"],
-            width=500
-        )
+    st.write(
+        "### Evidencia final"
+    )
+
+    url_cierre = obtener_url_publica(
+        ruta_cierre
+    )
+
+    st.image(
+        url_cierre,
+        caption="Evidencia final",
+        use_container_width=True
+    )
 
 # =====================================================
 # CAMBIO DE ESTADO

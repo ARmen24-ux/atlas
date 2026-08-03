@@ -281,9 +281,8 @@ if nuevo_estado == "Resuelto":
         "### 📷 Evidencia de cierre"
     )
 
-    imagen_cierre = st.file_uploader(
+    imagen_cierre = st.camera_input(
         "Fotografía del trabajo realizado",
-        type=["png", "jpg", "jpeg"],
         key="img_cierre"
     )
 

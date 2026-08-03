@@ -6,7 +6,7 @@ from database.reportes_db import (
 )
 
 from Services.evidencias_service import (
-    guardar_imagen
+    subir_imagen_supabase
 )
 
 from utils.historial import (
@@ -32,8 +32,9 @@ def crear_reporte(datos):
         # Guardar imagen
         # ==========================================
 
-        ruta_img = guardar_imagen(
-            datos.get("imagen")
+        ruta_imagen = subir_imagen_supabase(
+            datos["imagen"],
+            carpeta="apertura"
         )
 
         # ==========================================
@@ -80,7 +81,7 @@ def crear_reporte(datos):
 
             "Impacto": datos["impacto"],
 
-            "ImagenApertura": ruta_img,
+            "ImagenApertura": ruta_imagen,
 
             "ImagenCierre": None,
 

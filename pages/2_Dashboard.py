@@ -11,7 +11,7 @@ from utils.comentarios import (
     obtener_comentarios
 )
 from database.supabase_client import supabase
-from Services.evidencias_service import obtener_url_publica
+from Services.evidencias_service import (obtener_url_publica, subir_imagen_supabase)
 
 def aplicar_sla(df):
     df = df.copy()
@@ -353,36 +353,12 @@ if st.button("Guardar cambios"):
 
     if imagen_cierre is not None:
 
-        os.makedirs(
-            "evidencias",
-            exist_ok=True
+        ruta_storage = subir_imagen_supabase(
+            imagen_cierre,
+            carpeta="cierre"
         )
 
-
-        nombre_img = (
-            datetime.now().strftime("%Y%m%d%H%M%S")
-            + "_CIERRE_"
-            + imagen_cierre.name
-        )
-
-
-        ruta_img = os.path.join(
-            "evidencias",
-            nombre_img
-        )
-
-
-        with open(
-            ruta_img,
-            "wb"
-        ) as f:
-
-            f.write(
-                imagen_cierre.getbuffer()
-            )
-
-
-        cambios["ImagenCierre"] = ruta_img
+        cambios["ImagenCierre"] = ruta_storage
 
 
 

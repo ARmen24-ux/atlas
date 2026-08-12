@@ -391,42 +391,36 @@ def existe_folio(
 # =====================================================
 
 def listar_folios():
-
     """
-    Devuelve una lista de folios.
+    Devuelve una lista de folios
+    ordenados de forma ascendente.
     """
 
     try:
 
         respuesta = (
-
             supabase
-
             .table(TABLA)
-
-            .select(
-                "Folio"
-            )
-
-            .order(
-                "FechaCreacion",
-                desc=True
-            )
-
+            .select("Folio")
             .execute()
-
         )
 
-        return [
-
+        folios = [
             r["Folio"]
-
-            for r in respuesta.data
-
+            for r in respuesta.data or []
+            if r.get("Folio")
         ]
 
-    except:
+        # Orden numérico por el consecutivo final
+        folios.sort(
+            key=lambda folio: int(
+                str(folio).split("-")[-1]
+            )
+        )
 
+        return folios
+
+    except Exception:
         return []
 
 

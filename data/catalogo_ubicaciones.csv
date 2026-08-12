@@ -1,64 +1,40 @@
 Edificio,Area
-Edificio 1 - Laboratorios y Talleres,Laboratorio de Diseño
-Edificio 1 - Laboratorios y Talleres,Taller de Maquinado
-Edificio 1 - Laboratorios y Talleres,Taller de Soldadura
-
-Edificio 2 - Cafetería,Cafetería
-Edificio 2 - Cafetería,Cocina
-Edificio 2 - Cafetería,Almacén Cafetería
-Edificio 2 - Cafetería,Área de Comensales
-
-Edificio 3 - Information Center,Biblioteca
-Edificio 3 - Information Center,Sala de Conferencias 1
-Edificio 3 - Information Center,Sala de Conferencias 2
-Edificio 3 - Information Center,Área de Proyectos
-Edificio 3 - Information Center,Recepción
-Edificio 3 - Information Center,Oficinas Administrativas IC
-
-Edificio 4 - Académico y Administrativo,Salón PB-01
-Edificio 4 - Académico y Administrativo,Salón PB-02
-Edificio 4 - Académico y Administrativo,Salón PB-03
-Edificio 4 - Académico y Administrativo,Salón PB-04
-Edificio 4 - Académico y Administrativo,Salón PB-05
-Edificio 4 - Académico y Administrativo,Salón PB-06
-Edificio 4 - Académico y Administrativo,Salón PB-07
-Edificio 4 - Académico y Administrativo,Salón PB-08
-
-Edificio 4 - Académico y Administrativo,Auditorio
-
-Edificio 4 - Académico y Administrativo,Oficina Docente PB-01
-Edificio 4 - Académico y Administrativo,Oficina Docente PB-02
-Edificio 4 - Académico y Administrativo,Oficina Docente PB-03
-
-Edificio 4 - Académico y Administrativo,Coordinación Académica
-Edificio 4 - Académico y Administrativo,Servicios Escolares
-
-Edificio 4 - Académico y Administrativo,Salón PA-01
-Edificio 4 - Académico y Administrativo,Salón PA-02
-Edificio 4 - Académico y Administrativo,Salón PA-03
-Edificio 4 - Académico y Administrativo,Salón PA-04
-Edificio 4 - Académico y Administrativo,Salón PA-05
-Edificio 4 - Académico y Administrativo,Salón PA-06
-
-Edificio 4 - Académico y Administrativo,Laboratorio de Idiomas
-Edificio 4 - Académico y Administrativo,Laboratorio de Computación
-
-Edificio 4 - Académico y Administrativo,Oficina Docente PA-01
-Edificio 4 - Académico y Administrativo,Oficina Docente PA-02
-Edificio 4 - Académico y Administrativo,Oficina Docente PA-03
-
-Laboratorio de Aeronáutica,Laboratorio de Aeronáutica
-Laboratorio de Aeronáutica,Área del Avión
-Laboratorio de Aeronáutica,Área de Simulación
-Laboratorio de Aeronáutica,Almacén Aeronáutica
-
-Instalaciones Deportivas,Cancha de Básquetbol
-Instalaciones Deportivas,Cancha de Voleibol
-Instalaciones Deportivas,Campo de Fútbol
-Instalaciones Deportivas,Gradas
-
-Exteriores,Plaza Cívica
-Exteriores,Estacionamiento Principal
-Exteriores,Andadores
-Exteriores,Áreas Verdes
-Exteriores,Acceso Principal
+Edificio I - Academic Building,Aula 1
+Edificio I - Academic Building,Aula 2
+Edificio I - Academic Building,Aula 3
+Edificio I - Academic Building,Aula 4
+Edificio I - Academic Building,Aula 5
+Edificio I - Academic Building,Aula 6
+Edificio I - Academic Building,Aula 7
+Edificio I - Academic Building,Auditorio
+Edificio I - Academic Building,Aula grande
+Edificio I - Academic Building,Baños
+Edificio I - Academic Building,Academic department
+Edificio I - Academic Building,Student services
+Edificio I - Academic Building,Aula 8
+Edificio I - Academic Building,Aula 9
+Edificio I - Academic Building,Aula 10
+Edificio I - Academic Building,Aula 11
+Edificio I - Academic Building,Aula 12
+Edificio I - Academic Building,Aula 13
+Edificio I - Academic Building,Psicología
+Edificio I - Academic Building,Casio
+Edificio I - Academic Building,Laboratorio de idiomas
+Edificio I - Academic Building,Aula de maestros
+Edificio I - Academic Building,Administrative department
+Edificio II - International Center Lab,"Laboratorio de innovación, diseño y manufactura digital"
+Edificio II - International Center Lab,Laboratorio de equipo pesado
+Edificio II - International Center Lab,"Centro certificador de innovación, diseño y manufactura digital"
+Edificio II - International Center Lab,Baños
+Edificio III - Information Center,Sala de conferencias
+Edificio III - Information Center,Oficina de rectoría
+Edificio III - Information Center,Biblioteca
+Edificio III - Information Center,Oficina de finanzas
+Edificio III - Information Center,Baños
+Edificio III - Information Center,Oficina de administrativos
+Edificio III - Information Center,Sala de reuniones
+Zonas exteriores,Cancha de voley
+Zonas exteriores,Cancha de futbol
+Zonas exteriores,Cancha de básquet
+Zonas exteriores,Estacionamiento
+Zonas exteriores,Cafetería + baños

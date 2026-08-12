@@ -129,10 +129,13 @@ df_filtrado = df.copy()
 
 
 
+# =====================================================
+# BUSCAR Y ORDENAR POR FOLIO
+# =====================================================
+
 if busqueda:
 
     df_filtrado = df_filtrado[
-
         df_filtrado["Folio"]
         .astype(str)
         .str.contains(
@@ -140,8 +143,24 @@ if busqueda:
             case=False,
             na=False
         )
-
     ]
+
+
+# =====================================================
+# ORDEN ASCENDENTE DE FOLIOS
+# =====================================================
+
+if not df_filtrado.empty:
+
+    df_filtrado = df_filtrado.sort_values(
+        by="Folio",
+        key=lambda columna: columna.astype(str).map(
+            lambda folio: int(
+                folio.split("-")[-1]
+            )
+        ),
+        ascending=True
+    )
 
 
 

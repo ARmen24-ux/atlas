@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
+import sys
 import os
 from utils.historial import registrar_movimiento
 from utils.data_guard import asegurar_esquema
@@ -142,9 +143,23 @@ if len(df_filtrado) == 0:
     st.warning("No hay tickets disponibles")
     st.stop()
 
+ticket_folios = (
+    df_filtrado["Folio"]
+    .dropna()
+    .astype(str)
+    .unique()
+    .tolist()
+)
+
+ticket_folios.sort(
+    key=lambda folio: int(
+        folio.split("-")[-1]
+    )
+)
+
 ticket_folio = st.selectbox(
     "Selecciona ticket",
-    df_filtrado["Folio"].unique()
+    ticket_folios
 )
 
 ticket_df = df[

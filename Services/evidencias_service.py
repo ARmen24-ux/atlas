@@ -12,6 +12,7 @@ import uuid
 MAX_PIXELS = 1600          # Resolución máxima
 CALIDAD_JPG = 82           # Calidad JPEG
 
+# ATLAS - servicio de evidencias Supabase
 
 # =====================================================
 # COMPRIMIR IMAGEN

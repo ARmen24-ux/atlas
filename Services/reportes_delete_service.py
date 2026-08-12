@@ -1,10 +1,5 @@
 from database.supabase_client import supabase
 
-from Services.evidencias_service import (
-    eliminar_imagen_supabase
-)
-
-
 # =====================================================
 # OBTENER REPORTE PARA ELIMINACIÓN
 # =====================================================
@@ -50,7 +45,39 @@ def obtener_datos_eliminacion(folio):
             f"Error preparando eliminación: {e}"
         )
 
+# =====================================================
+# ELIMINAR IMAGEN DE SUPABASE STORAGE
+# =====================================================
 
+def eliminar_imagen_storage(ruta):
+    """
+    Elimina una imagen del bucket 'evidencias'.
+
+    Parámetros:
+        ruta: ruta exacta del archivo dentro del bucket.
+
+    Devuelve:
+        True si la eliminación fue exitosa.
+        False si no existe una ruta válida.
+    """
+
+    if ruta in ["", None]:
+        return False
+
+    try:
+
+        supabase.storage.from_("evidencias").remove(
+            [ruta]
+        )
+
+        return True
+
+    except Exception as e:
+
+        raise Exception(
+            f"Error al eliminar evidencia "
+            f"'{ruta}': {e}"
+        )
 # =====================================================
 # ELIMINAR HISTORIAL
 # =====================================================
@@ -185,7 +212,7 @@ def eliminar_reporte_completo(folio):
 
         if datos["imagen_apertura"]:
 
-            eliminar_imagen_supabase(
+            eliminar_imagen_storage(
                 datos["imagen_apertura"]
             )
 
@@ -195,7 +222,7 @@ def eliminar_reporte_completo(folio):
 
         if datos["imagen_cierre"]:
 
-            eliminar_imagen_supabase(
+            eliminar_imagen_storage(
                 datos["imagen_cierre"]
             )
 

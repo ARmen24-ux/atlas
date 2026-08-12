@@ -140,3 +140,40 @@ def obtener_url_publica(ruta):
         .from_("evidencias")
         .get_public_url(ruta)
     )
+
+# =====================================================
+# ELIMINAR IMAGEN DE SUPABASE STORAGE
+# =====================================================
+
+def eliminar_imagen_supabase(ruta):
+    """
+    Elimina una imagen del bucket 'evidencias'.
+
+    Parámetros:
+        ruta: ruta exacta del archivo dentro del bucket.
+
+    Devuelve:
+        True si la eliminación fue exitosa.
+        False si no existe una ruta válida.
+    """
+
+    if ruta in ["", None]:
+        return False
+
+    try:
+
+        respuesta = (
+            supabase
+            .storage
+            .from_("evidencias")
+            .remove([ruta])
+        )
+
+        return True
+
+    except Exception as e:
+
+        raise Exception(
+            f"Error al eliminar evidencia "
+            f"'{ruta}': {e}"
+        )

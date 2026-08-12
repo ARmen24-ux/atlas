@@ -12,6 +12,9 @@ from utils.comentarios import (
 )
 from database.supabase_client import supabase
 from Services.evidencias_service import (obtener_url_publica, subir_imagen_supabase)
+from Services.reportes_delete_service import (
+    eliminar_reporte_completo
+)
 
 def aplicar_sla(df):
     df = df.copy()
@@ -526,3 +529,96 @@ except Exception as e:
     st.warning(
         f"No fue posible cargar el historial: {e}"
     )
+
+# =====================================================
+# ADMINISTRACIÓN DEL TICKET
+# =====================================================
+
+st.divider()
+
+st.subheader("⚠️ Administración del ticket")
+
+st.warning(
+    "La eliminación de un reporte es permanente. "
+    "Se eliminarán también sus evidencias, historial "
+    "y comentarios relacionados."
+)
+
+if st.button(
+    "🗑️ Eliminar este reporte",
+    type="secondary"
+):
+
+    st.session_state["confirmar_eliminacion"] = True
+
+
+# =====================================================
+# CONFIRMACIÓN DE ELIMINACIÓN
+# =====================================================
+
+if st.session_state.get(
+    "confirmar_eliminacion",
+    False
+):
+
+    st.error(
+        f"""
+        ⚠️ **¿Confirmas la eliminación del reporte
+        {ticket_folio}?**
+
+        Esta acción eliminará permanentemente:
+
+        - Reporte
+        - Evidencia inicial
+        - Evidencia de cierre
+        - Historial
+        - Comentarios
+
+        **Esta acción no se puede deshacer.**
+        """
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        if st.button(
+            "❌ Cancelar",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "confirmar_eliminacion"
+            ] = False
+
+            st.rerun()
+
+    with col2:
+
+        if st.button(
+            "🗑️ Confirmar eliminación",
+            type="primary",
+            use_container_width=True
+        ):
+
+            resultado = eliminar_reporte_completo(
+                ticket_folio
+            )
+
+            if resultado["exito"]:
+
+                st.session_state[
+                    "confirmar_eliminacion"
+                ] = False
+
+                st.success(
+                    resultado["mensaje"]
+                )
+
+                st.rerun()
+
+            else:
+
+                st.error(
+                    resultado["mensaje"]
+                )

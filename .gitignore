@@ -1,0 +1,17 @@
+# Entorno virtual
+.venv/
+
+# Archivos generados por Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Secretos y configuración local
+.streamlit/secrets.toml
+
+# Archivos temporales
+*.tmp
+*.log
+
+# Respaldos generados localmente
+backups/

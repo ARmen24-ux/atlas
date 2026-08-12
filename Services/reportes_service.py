@@ -9,6 +9,10 @@ from Services.evidencias_service import (
     subir_imagen_supabase
 )
 
+from Services.backup_manager_service import (
+    ejecutar_respaldo_si_corresponde
+)
+
 from utils.historial import (
     registrar_movimiento
 )
@@ -101,6 +105,7 @@ def crear_reporte(datos):
 
         guardar_reporte(reporte)
 
+
         # ==========================================
         # Historial
         # ==========================================
@@ -116,6 +121,24 @@ def crear_reporte(datos):
             detalle="Reporte creado"
 
         )
+
+
+        # =====================================================
+        # VERIFICAR RESPALDO AUTOMÁTICO
+        # =====================================================
+
+        try:
+
+            resultado_respaldo = (
+                ejecutar_respaldo_si_corresponde()
+            )
+
+        except Exception as e:
+
+            resultado_respaldo = {
+                "ejecutado": False,
+                "error": str(e)
+            }
 
         return {
 
